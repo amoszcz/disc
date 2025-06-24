@@ -60,21 +60,31 @@ export class GameStateManager {
       return null;
     }
 
-    const target = this.gameState.board[targetRow][targetCol];
-    if (!target) {
-      return null;
+    const unitManager = this.boardManager.getUnitManager();
+
+    if (!unitManager.canAttackTarget(this.gameState.selectedUnit, targetRow, targetCol, this.gameState.board)) {
+      return {
+        success: false,
+        targets: [],
+        totalDamage: 0,
+        targetsKilled: 0,
+        healingDone: 0,
+        message: "Cannot target this unit"
+      };
     }
 
-    const unitManager = this.boardManager.getUnitManager();
-    const result = unitManager.performAttack(this.gameState.selectedUnit, target);
+    const result = unitManager.performAttack(
+        this.gameState.selectedUnit,
+        targetRow,
+        targetCol,
+        this.gameState.board,
+        this.config.BOARD_ROWS,
+        this.config.BOARD_COLS
+    );
 
     if (result.success) {
       this.gameState.selectedUnit = null;
-
-      // Check if the game should end
       this.checkGameOver();
-
-      // Check if turn should end automatically
       this.checkAutoEndTurn();
     }
 
@@ -100,11 +110,10 @@ export class GameStateManager {
         this.config.BOARD_COLS
     );
 
-    // If no units can act, automatically end turn
     if (activeUnits.length === 0) {
       setTimeout(() => {
         this.switchTurn();
-      }, 1000); // Small delay to show the attack result
+      }, 1000);
     }
   }
 
@@ -188,7 +197,6 @@ export class GameStateManager {
     this.gameState.currentTurn = this.gameState.currentTurn === 1 ? 2 : 1;
     this.deselectAllUnits();
 
-    // Reset activity for all units of the new team
     const unitManager = this.boardManager.getUnitManager();
     for (let row = 0; row < this.config.BOARD_ROWS; row++) {
       for (let col = 0; col < this.config.BOARD_COLS; col++) {

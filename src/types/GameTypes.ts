@@ -1,13 +1,21 @@
-﻿export interface Unit {
+﻿
+export enum UnitType {
+  ARCHER = 'archer',
+  MAGE = 'mage',
+  PRIEST = 'priest'
+}
+
+export interface Unit {
   team: 1 | 2;
   row: number;
   col: number;
-  att: number;  // Attack damage
-  lif: number;  // Life points (current health)
-  maxLif: number; // Maximum life points
+  att: number;
+  lif: number;
+  maxLif: number;
   isAlive: boolean;
   isSelected: boolean;
-  hasActed: boolean; // New property to track if unit has acted this turn
+  hasActed: boolean;
+  type: UnitType;
 }
 
 export interface GameState {
@@ -52,9 +60,22 @@ export interface Button {
   onClick: () => void;
 }
 
+export interface AttackTarget {
+  unit: Unit;
+  row: number;
+  col: number;
+}
+
 export interface AttackResult {
   success: boolean;
-  damage: number;
-  targetKilled: boolean;
+  targets: AttackTarget[];
+  totalDamage: number;
+  targetsKilled: number;
+  healingDone: number;
   message: string;
+}
+
+export interface BoardPosition {
+  row: number;
+  col: number;
 }

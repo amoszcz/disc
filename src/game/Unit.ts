@@ -1,4 +1,6 @@
-﻿import type { Unit, GameConfig, AttackResult } from '../types/GameTypes.js';
+﻿import type { Unit, GameConfig, AttackResult, UnitType } from '../types/GameTypes.js';
+import { UnitType as UnitTypeEnum } from '../types/GameTypes.js';
+import { AttackStrategyFactory } from '../strategy/AttackStrategyFactory.js';
 
 export class UnitManager {
     private config: GameConfig;
@@ -7,7 +9,14 @@ export class UnitManager {
         this.config = config;
     }
 
-    public createUnit(team: 1 | 2, row: number, col: number): Unit {
+    public createUnit(team: 1 | 2, row: number, col: number, type?: UnitType): Unit {
+        // Assign unit types in a pattern if not specified
+        let unitType = type;
+        if (!unitType) {
+            const typeIndex = (row + col) % 3;
+            unitType = [UnitTypeEnum.ARCHER, UnitTypeEnum.MAGE, UnitTypeEnum.PRIEST][typeIndex];
+        }
+
         return {
             team: team,
             row: row,
@@ -17,7 +26,8 @@ export class UnitManager {
             maxLif: this.config.DEFAULT_LIF,
             isAlive: true,
             isSelected: false,
-            hasActed: false
+            hasActed: false,
+            type: unitType
         };
     }
 
@@ -26,12 +36,16 @@ export class UnitManager {
         this.updateUnitStatus(unit);
     }
 
+    public healUnit(unit: Unit, healAmount: number): void {
+        unit.lif = Math.min(unit.lif + healAmount, unit.maxLif);
+    }
+
     public updateUnitStatus(unit: Unit): void {
         if (unit.lif <= 0) {
             unit.isAlive = false;
             unit.lif = 0;
             unit.isSelected = false;
-            unit.hasActed = true; // Dead units are considered "acted"
+            unit.hasActed = true;
         }
     }
 
@@ -55,38 +69,14 @@ export class UnitManager {
         return unit.isAlive && unit.team === currentTeam && !unit.hasActed;
     }
 
-    public canAttackTarget(attacker: Unit, target: Unit): boolean {
-        return attacker.isAlive &&
-            target.isAlive &&
-            attacker.team !== target.team &&
-            !attacker.hasActed;
+    public canAttackTarget(attacker: Unit, targetRow: number, targetCol: number, board: (Unit | null)[][]): boolean {
+        const strategy = AttackStrategyFactory.getStrategy(attacker.type);
+        return strategy.canAttack(attacker, targetRow, targetCol, board);
     }
 
-    public performAttack(attacker: Unit, target: Unit): AttackResult {
-        if (!this.canAttackTarget(attacker, target)) {
-            return {
-                success: false,
-                damage: 0,
-                targetKilled: false,
-                message: "Cannot attack this target"
-            };
-        }
-
-        const damage = attacker.att;
-        const targetLifeBefore = target.lif;
-
-        this.damageUnit(target, damage);
-        attacker.hasActed = true;
-        attacker.isSelected = false; // Deselect after acting
-
-        const targetKilled = !target.isAlive;
-
-        return {
-            success: true,
-            damage: damage,
-            targetKilled: targetKilled,
-            message: `${damage} damage dealt${targetKilled ? ' - Target eliminated!' : ''}`
-        };
+    public performAttack(attacker: Unit, targetRow: number, targetCol: number, board: (Unit | null)[][], boardRows: number, boardCols: number): AttackResult {
+        const strategy = AttackStrategyFactory.getStrategy(attacker.type);
+        return strategy.executeAttack(attacker, targetRow, targetCol, board, boardRows, boardCols);
     }
 
     public resetUnitActivity(unit: Unit): void {
@@ -112,5 +102,18 @@ export class UnitManager {
         }
 
         return activeUnits;
+    }
+
+    public getUnitTypeDisplayName(type: UnitType): string {
+        switch (type) {
+            case UnitTypeEnum.ARCHER:
+                return 'Archer';
+            case UnitTypeEnum.MAGE:
+                return 'Mage';
+            case UnitTypeEnum.PRIEST:
+                return 'Priest';
+            default:
+                return 'Unknown';
+        }
     }
 }

@@ -1,4 +1,6 @@
-﻿import type { Unit, GameState, GameConfig } from '../types/GameTypes.js';
+﻿
+import type { Unit, GameState, GameConfig } from '../types/GameTypes.js';
+import { UnitType } from '../types/GameTypes.js';
 import { UnitManager } from '../game/Unit.js';
 
 export class UnitRenderer {
@@ -26,6 +28,7 @@ export class UnitRenderer {
                 this.drawUnit(ctx, unit, centerX, centerY, gameState.currentTurn);
                 this.drawHealthBar(ctx, unit, centerX, centerY);
                 this.drawUnitStats(ctx, unit, centerX, centerY);
+                this.drawUnitType(ctx, unit, centerX, centerY);
 
                 if (unit.hasActed) {
                     this.drawInactiveOverlay(ctx, centerX, centerY);
@@ -58,7 +61,6 @@ export class UnitRenderer {
         const healthPercent = this.unitManager.getHealthPercentage(unit);
         let alpha = Math.max(0.3, healthPercent);
 
-        // Dim non-active team units and inactive units
         if (unit.team !== currentTurn) {
             alpha *= 0.7;
         }
@@ -66,41 +68,49 @@ export class UnitRenderer {
             alpha *= 0.5;
         }
 
-        if (unit.team === 1) {
-            ctx.fillStyle = `rgba(74, 144, 226, ${alpha})`;
-        } else {
-            ctx.fillStyle = `rgba(226, 74, 74, ${alpha})`;
+        // Different colors based on unit type
+        let baseColor: string;
+        switch (unit.type) {
+            case UnitType.ARCHER:
+                baseColor = unit.team === 1 ? '74, 144, 226' : '226, 74, 74'; // Blue/Red
+                break;
+            case UnitType.MAGE:
+                baseColor = unit.team === 1 ? '147, 51, 234' : '220, 38, 127'; // Purple/Pink
+                break;
+            case UnitType.PRIEST:
+                baseColor = unit.team === 1 ? '34, 197, 94' : '249, 115, 22'; // Green/Orange
+                break;
+            default:
+                baseColor = unit.team === 1 ? '74, 144, 226' : '226, 74, 74';
         }
+
+        ctx.fillStyle = `rgba(${baseColor}, ${alpha})`;
         ctx.fill();
 
         ctx.strokeStyle = unit.team === 1 ? '#2c5282' : '#c53030';
         ctx.lineWidth = unit.isSelected ? 5 : 3;
         ctx.stroke();
 
-        // Glow for selectable units
         if (unit.team === currentTurn && !unit.isSelected && !unit.hasActed) {
             ctx.beginPath();
             ctx.arc(centerX, centerY, this.config.UNIT_RADIUS + 2, 0, 2 * Math.PI);
-            ctx.strokeStyle = unit.team === 1 ? 'rgba(74, 144, 226, 0.3)' : 'rgba(226, 74, 74, 0.3)';
+            ctx.strokeStyle = `rgba(${baseColor}, 0.3)`;
             ctx.lineWidth = 2;
             ctx.stroke();
         }
     }
 
     private drawInactiveOverlay(ctx: CanvasRenderingContext2D, centerX: number, centerY: number): void {
-        // Draw diagonal lines to indicate inactive unit
         ctx.strokeStyle = 'rgba(0, 0, 0, 0.6)';
         ctx.lineWidth = 3;
 
         const offset = this.config.UNIT_RADIUS * 0.7;
 
-        // First diagonal line
         ctx.beginPath();
         ctx.moveTo(centerX - offset, centerY - offset);
         ctx.lineTo(centerX + offset, centerY + offset);
         ctx.stroke();
 
-        // Second diagonal line
         ctx.beginPath();
         ctx.moveTo(centerX - offset, centerY + offset);
         ctx.lineTo(centerX + offset, centerY - offset);
@@ -147,5 +157,38 @@ export class UnitRenderer {
         ctx.shadowBlur = 0;
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 0;
+    }
+
+    private drawUnitType(ctx: CanvasRenderingContext2D, unit: Unit, centerX: number, centerY: number): void {
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 10px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+
+        ctx.shadowColor = 'black';
+        ctx.shadowBlur = 2;
+        ctx.shadowOffsetX = 1;
+        ctx.shadowOffsetY = 1;
+
+        const typeText = this.getUnitTypeSymbol(unit.type);
+        ctx.fillText(typeText, centerX, centerY + this.config.UNIT_RADIUS + 8);
+
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+    }
+
+    private getUnitTypeSymbol(type: UnitType): string {
+        switch (type) {
+            case UnitType.ARCHER:
+                return '🏹';
+            case UnitType.MAGE:
+                return '🔥';
+            case UnitType.PRIEST:
+                return '✚';
+            default:
+                return '?';
+        }
     }
 }

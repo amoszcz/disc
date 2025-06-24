@@ -1,5 +1,4 @@
-﻿
-import type { GameStateManager } from '../game/GameState.js';
+﻿import type { GameStateManager } from '../game/GameState.js';
 import type { Renderer } from '../rendering/Renderer.js';
 
 export class InputManager {
@@ -67,21 +66,35 @@ export class InputManager {
                 if (this.gameStateManager.gameState.selectedUnit &&
                     this.gameStateManager.gameState.selectedUnit !== unit) {
 
-                    // Check if clicked unit is from the same team (friendly unit)
-                    if (unit.team === this.gameStateManager.gameState.currentTurn) {
-                        // Try to select the friendly unit instead
-                        const wasSelected = this.gameStateManager.selectUnit(boardPos.row, boardPos.col);
-                        if (!wasSelected) {
-                            // If we can't select it (inactive unit), deselect all
-                            this.gameStateManager.deselectAllUnits();
-                        }
-                    } else {
-                        // Different team - try to attack
+                    // First check if the selected unit can attack/heal the target
+                    const unitManager = this.gameStateManager.getBoardManager().getUnitManager();
+                    const canAttackTarget = unitManager.canAttackTarget(
+                        this.gameStateManager.gameState.selectedUnit,
+                        boardPos.row,
+                        boardPos.col,
+                        this.gameStateManager.gameState.board
+                    );
+
+                    if (canAttackTarget) {
+                        // Can attack/heal this target - perform the action
                         const attackResult = this.gameStateManager.attemptAttack(boardPos.row, boardPos.col);
                         if (attackResult && attackResult.success) {
                             this.showAttackMessage(attackResult.message);
                         } else if (attackResult && !attackResult.success) {
                             this.showAttackMessage(attackResult.message);
+                        }
+                    } else {
+                        // Cannot attack/heal target, check if it's a friendly unit we can select instead
+                        if (unit.team === this.gameStateManager.gameState.currentTurn) {
+                            // Try to select the friendly unit instead
+                            const wasSelected = this.gameStateManager.selectUnit(boardPos.row, boardPos.col);
+                            if (!wasSelected) {
+                                // If we can't select it (inactive unit), deselect all
+                                this.gameStateManager.deselectAllUnits();
+                            }
+                        } else {
+                            // Different team but can't attack - show message or deselect
+                            this.gameStateManager.deselectAllUnits();
                         }
                     }
                 } else {
