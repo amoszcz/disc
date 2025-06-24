@@ -13,8 +13,8 @@ export class UnitManager {
         // Assign unit types in a pattern if not specified
         let unitType = type;
         if (!unitType) {
-            const typeIndex = (row + col) % 3;
-            unitType = [UnitTypeEnum.ARCHER, UnitTypeEnum.MAGE, UnitTypeEnum.PRIEST][typeIndex];
+            const typeIndex = (row + col) % 4;
+            unitType = [UnitTypeEnum.ARCHER, UnitTypeEnum.MAGE, UnitTypeEnum.PRIEST,UnitTypeEnum.KNIGHT][typeIndex];
         }
 
         return {
@@ -112,6 +112,8 @@ export class UnitManager {
                 return 'Mage';
             case UnitTypeEnum.PRIEST:
                 return 'Priest';
+            case UnitTypeEnum.KNIGHT:
+                return 'Knight';
             default:
                 return 'Unknown';
         }

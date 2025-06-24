@@ -2,7 +2,8 @@
 export enum UnitType {
   ARCHER = 'archer',
   MAGE = 'mage',
-  PRIEST = 'priest'
+  PRIEST = 'priest',
+  KNIGHT = 'knight'  // New!
 }
 
 export interface Unit {

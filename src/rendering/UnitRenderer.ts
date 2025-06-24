@@ -1,7 +1,6 @@
-﻿
-import type { Unit, GameState, GameConfig } from '../types/GameTypes.js';
-import { UnitType } from '../types/GameTypes.js';
+﻿import type { Unit, GameState, GameConfig } from '../types/GameTypes.js';
 import { UnitManager } from '../game/Unit.js';
+import { UnitRenderStrategyFactory } from './strategy/UnitRenderStrategyFactory.js';
 
 export class UnitRenderer {
     private config: GameConfig;
@@ -28,7 +27,7 @@ export class UnitRenderer {
                 this.drawUnit(ctx, unit, centerX, centerY, gameState.currentTurn);
                 this.drawHealthBar(ctx, unit, centerX, centerY);
                 this.drawUnitStats(ctx, unit, centerX, centerY);
-                this.drawUnitType(ctx, unit, centerX, centerY);
+                this.drawUnitTypeSymbol(ctx, unit, centerX, centerY);
 
                 if (unit.hasActed) {
                     this.drawInactiveOverlay(ctx, centerX, centerY);
@@ -55,48 +54,26 @@ export class UnitRenderer {
     }
 
     private drawUnit(ctx: CanvasRenderingContext2D, unit: Unit, centerX: number, centerY: number, currentTurn: 1 | 2): void {
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, this.config.UNIT_RADIUS, 0, 2 * Math.PI);
+        const strategy = UnitRenderStrategyFactory.getStrategy(unit.type);
 
-        const healthPercent = this.unitManager.getHealthPercentage(unit);
-        let alpha = Math.max(0.3, healthPercent);
+        // Draw the unit shape using the strategy
+        strategy.drawUnitShape(ctx, unit, centerX, centerY, this.config);
 
-        if (unit.team !== currentTurn) {
-            alpha *= 0.7;
-        }
-        if (unit.hasActed) {
-            alpha *= 0.5;
-        }
-
-        // Different colors based on unit type
-        let baseColor: string;
-        switch (unit.type) {
-            case UnitType.ARCHER:
-                baseColor = unit.team === 1 ? '74, 144, 226' : '226, 74, 74'; // Blue/Red
-                break;
-            case UnitType.MAGE:
-                baseColor = unit.team === 1 ? '147, 51, 234' : '220, 38, 127'; // Purple/Pink
-                break;
-            case UnitType.PRIEST:
-                baseColor = unit.team === 1 ? '34, 197, 94' : '249, 115, 22'; // Green/Orange
-                break;
-            default:
-                baseColor = unit.team === 1 ? '74, 144, 226' : '226, 74, 74';
-        }
-
-        ctx.fillStyle = `rgba(${baseColor}, ${alpha})`;
-        ctx.fill();
-
-        ctx.strokeStyle = unit.team === 1 ? '#2c5282' : '#c53030';
-        ctx.lineWidth = unit.isSelected ? 5 : 3;
-        ctx.stroke();
-
+        // Draw turn indicator for active units
         if (unit.team === currentTurn && !unit.isSelected && !unit.hasActed) {
+            const visualConfig = strategy.getVisualConfig();
+            const baseColor = unit.team === 1 ? visualConfig.team1Color : visualConfig.team2Color;
+
             ctx.beginPath();
             ctx.arc(centerX, centerY, this.config.UNIT_RADIUS + 2, 0, 2 * Math.PI);
             ctx.strokeStyle = `rgba(${baseColor}, 0.3)`;
             ctx.lineWidth = 2;
             ctx.stroke();
+        }
+
+        // Draw special effects if available
+        if (strategy.drawSpecialEffects) {
+            strategy.drawSpecialEffects(ctx, unit, centerX, centerY, this.config);
         }
     }
 
@@ -159,7 +136,10 @@ export class UnitRenderer {
         ctx.shadowOffsetY = 0;
     }
 
-    private drawUnitType(ctx: CanvasRenderingContext2D, unit: Unit, centerX: number, centerY: number): void {
+    private drawUnitTypeSymbol(ctx: CanvasRenderingContext2D, unit: Unit, centerX: number, centerY: number): void {
+        const strategy = UnitRenderStrategyFactory.getStrategy(unit.type);
+        const visualConfig = strategy.getVisualConfig();
+
         ctx.fillStyle = 'white';
         ctx.font = 'bold 10px Arial';
         ctx.textAlign = 'center';
@@ -170,25 +150,11 @@ export class UnitRenderer {
         ctx.shadowOffsetX = 1;
         ctx.shadowOffsetY = 1;
 
-        const typeText = this.getUnitTypeSymbol(unit.type);
-        ctx.fillText(typeText, centerX, centerY + this.config.UNIT_RADIUS + 8);
+        ctx.fillText(visualConfig.symbol, centerX, centerY + this.config.UNIT_RADIUS + 8);
 
         ctx.shadowColor = 'transparent';
         ctx.shadowBlur = 0;
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 0;
-    }
-
-    private getUnitTypeSymbol(type: UnitType): string {
-        switch (type) {
-            case UnitType.ARCHER:
-                return '🏹';
-            case UnitType.MAGE:
-                return '🔥';
-            case UnitType.PRIEST:
-                return '✚';
-            default:
-                return '?';
-        }
     }
 }

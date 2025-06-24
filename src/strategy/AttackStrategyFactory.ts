@@ -3,12 +3,14 @@ import { UnitType } from '../types/GameTypes.js';
 import { ArcherAttackStrategy } from './ArcherAttackStrategy.js';
 import { MageAttackStrategy } from './MageAttackStrategy.js';
 import { PriestAttackStrategy } from './PriestAttackStrategy.js';
+import {KnightAttackStrategy} from "./KnightAttackStrategy";
 
 export class AttackStrategyFactory {
     private static strategies: Map<UnitType, AttackStrategy> = new Map([
         [UnitType.ARCHER, new ArcherAttackStrategy()],
         [UnitType.MAGE, new MageAttackStrategy()],
-        [UnitType.PRIEST, new PriestAttackStrategy()]
+        [UnitType.PRIEST, new PriestAttackStrategy()],
+        [UnitType.KNIGHT, new KnightAttackStrategy()]
     ]);
 
     public static getStrategy(unitType: UnitType): AttackStrategy {
