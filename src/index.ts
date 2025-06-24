@@ -93,24 +93,29 @@ class Game {
       const unit = this.gameStateManager.getUnitAt(boardPos.row, boardPos.col);
 
       if (unit) {
-        // If we have a selected unit and clicked on a different unit, try to attack
+        // If we have a selected unit and clicked on a different unit
         if (this.gameStateManager.gameState.selectedUnit &&
             this.gameStateManager.gameState.selectedUnit !== unit) {
 
-          const attackResult = this.gameStateManager.attemptAttack(boardPos.row, boardPos.col);
-          if (attackResult && attackResult.success) {
-            this.showAttackMessage(attackResult.message);
-          } else if (attackResult && !attackResult.success) {
-            this.showAttackMessage(attackResult.message);
-          } else {
-            // Try to select the clicked unit instead
+          // Check if clicked unit is from the same team (friendly unit)
+          if (unit.team === this.gameStateManager.gameState.currentTurn) {
+            // Try to select the friendly unit instead
             const wasSelected = this.gameStateManager.selectUnit(boardPos.row, boardPos.col);
             if (!wasSelected) {
+              // If we can't select it (inactive unit), deselect all
               this.gameStateManager.deselectAllUnits();
+            }
+          } else {
+            // Different team - try to attack
+            const attackResult = this.gameStateManager.attemptAttack(boardPos.row, boardPos.col);
+            if (attackResult && attackResult.success) {
+              this.showAttackMessage(attackResult.message);
+            } else if (attackResult && !attackResult.success) {
+              this.showAttackMessage(attackResult.message);
             }
           }
         } else {
-          // Try to select the clicked unit
+          // No unit selected or clicked on the same unit - try to select the clicked unit
           const wasSelected = this.gameStateManager.selectUnit(boardPos.row, boardPos.col);
           if (!wasSelected) {
             this.gameStateManager.deselectAllUnits();
@@ -125,6 +130,7 @@ class Game {
       this.gameStateManager.deselectAllUnits();
     }
   }
+
 
   private showAttackMessage(message: string): void {
     this.attackMessage = message;
