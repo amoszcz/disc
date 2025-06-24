@@ -3,7 +3,6 @@ import { CanvasManager } from './utils/Canvas.js';
 import { GameStateManager } from './game/GameState.js';
 import { Renderer } from './rendering/Renderer.js';
 
-// Game configuration
 const CONFIG: GameConfig = {
   BOARD_ROWS: 3,
   BOARD_COLS: 4,
@@ -18,6 +17,8 @@ class Game {
   private gameStateManager: GameStateManager;
   private renderer: Renderer;
   private lastTime: number = 0;
+  private attackMessage: string = '';
+  private attackMessageTime: number = 0;
 
   constructor() {
     this.canvasManager = new CanvasManager('game');
@@ -34,19 +35,16 @@ class Game {
     this.resizeCanvas();
     this.setupEventListeners();
 
-    // Start game loop
     requestAnimationFrame((timestamp) => this.gameLoop(timestamp));
   }
 
   private setupEventListeners(): void {
     window.addEventListener('resize', () => this.resizeCanvas());
 
-    // Listen for start game event
     window.addEventListener('startGame', () => {
       this.gameStateManager.startGame();
     });
 
-    // Mouse events for button interactions and unit selection
     if (this.canvasManager.canvas) {
       this.canvasManager.canvas.addEventListener('mousemove', (event) => {
         this.handleMouseMove(event);
@@ -57,7 +55,6 @@ class Game {
       });
     }
 
-    // Keyboard events
     window.addEventListener('keydown', (event) => {
       this.handleKeyDown(event);
     });
@@ -81,11 +78,9 @@ class Game {
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
 
-    // First check if a UI button was clicked
     const buttonManager = this.renderer.getUIRenderer().getButtonManager();
     const buttonClicked = buttonManager.handleMouseClick(mouseX, mouseY);
 
-    // If no button was clicked and we're in playing state, handle unit selection
     if (!buttonClicked && this.gameStateManager.gameState.gameStatus === 'playing') {
       this.handleUnitSelection(mouseX, mouseY);
     }
@@ -95,24 +90,53 @@ class Game {
     const boardPos = this.gameStateManager.getBoardPositionFromPixels(mouseX, mouseY);
 
     if (boardPos) {
-      // Click was on the board
       const unit = this.gameStateManager.getUnitAt(boardPos.row, boardPos.col);
 
       if (unit) {
-        // Clicked on a unit - try to select it
-        const wasSelected = this.gameStateManager.selectUnit(boardPos.row, boardPos.col);
+        // If we have a selected unit and clicked on a different unit, try to attack
+        if (this.gameStateManager.gameState.selectedUnit &&
+            this.gameStateManager.gameState.selectedUnit !== unit) {
 
-        if (!wasSelected) {
-          // Unit couldn't be selected (wrong team or dead), deselect all
-          this.gameStateManager.deselectAllUnits();
+          const attackResult = this.gameStateManager.attemptAttack(boardPos.row, boardPos.col);
+          if (attackResult && attackResult.success) {
+            this.showAttackMessage(attackResult.message);
+          } else if (attackResult && !attackResult.success) {
+            this.showAttackMessage(attackResult.message);
+          } else {
+            // Try to select the clicked unit instead
+            const wasSelected = this.gameStateManager.selectUnit(boardPos.row, boardPos.col);
+            if (!wasSelected) {
+              this.gameStateManager.deselectAllUnits();
+            }
+          }
+        } else {
+          // Try to select the clicked unit
+          const wasSelected = this.gameStateManager.selectUnit(boardPos.row, boardPos.col);
+          if (!wasSelected) {
+            this.gameStateManager.deselectAllUnits();
+          }
         }
       } else {
-        // Clicked on empty cell, deselect all units
+        // Clicked on empty cell
         this.gameStateManager.deselectAllUnits();
       }
     } else {
-      // Click was outside the board, deselect all units
+      // Click outside board
       this.gameStateManager.deselectAllUnits();
+    }
+  }
+
+  private showAttackMessage(message: string): void {
+    this.attackMessage = message;
+    this.attackMessageTime = Date.now();
+  }
+
+  private drawAttackMessage(ctx: CanvasRenderingContext2D, canvasWidth: number): void {
+    if (this.attackMessage && Date.now() - this.attackMessageTime < 3000) {
+      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
+      ctx.font = 'bold 24px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText(this.attackMessage, canvasWidth / 2, 150);
     }
   }
 
@@ -130,7 +154,7 @@ class Game {
           this.gameStateManager.resumeGame();
         }
         break;
-      case ' ': // Spacebar to switch turns (for testing)
+      case ' ':
         if (this.gameStateManager.gameState.gameStatus === 'playing') {
           this.gameStateManager.switchTurn();
         }
@@ -151,14 +175,11 @@ class Game {
   private gameLoop(timestamp: number): void {
     if (!this.canvasManager.ctx || !this.canvasManager.canvas) return;
 
-    // Calculate delta time
     const deltaTime = (timestamp - this.lastTime) / 1000;
     this.lastTime = timestamp;
 
-    // Clear canvas
     this.canvasManager.clearCanvas();
 
-    // Render game
     this.renderer.render(
         this.canvasManager.ctx,
         this.gameStateManager.gameState,
@@ -166,12 +187,13 @@ class Game {
         this.canvasManager.canvas.height
     );
 
-    // Continue the loop
+    // Draw attack messages
+    this.drawAttackMessage(this.canvasManager.ctx, this.canvasManager.canvas.width);
+
     requestAnimationFrame((timestamp) => this.gameLoop(timestamp));
   }
 }
 
-// Start the game when page loads
 window.addEventListener('load', () => {
   const game = new Game();
   game.init();

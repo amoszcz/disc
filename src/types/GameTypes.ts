@@ -6,7 +6,8 @@
   lif: number;  // Life points (current health)
   maxLif: number; // Maximum life points
   isAlive: boolean;
-  isSelected: boolean; // New property for selection state
+  isSelected: boolean;
+  hasActed: boolean; // New property to track if unit has acted this turn
 }
 
 export interface GameState {
@@ -17,7 +18,7 @@ export interface GameState {
   boardOffsetY: number;
   gameStatus: GameStatus;
   currentTurn: 1 | 2;
-  selectedUnit: Unit | null; // Currently selected unit
+  selectedUnit: Unit | null;
 }
 
 export enum GameStatus {
@@ -49,4 +50,11 @@ export interface Button {
   text: string;
   isHovered: boolean;
   onClick: () => void;
+}
+
+export interface AttackResult {
+  success: boolean;
+  damage: number;
+  targetKilled: boolean;
+  message: string;
 }

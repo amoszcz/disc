@@ -1,6 +1,5 @@
-﻿
-import type { GameState, GameConfig } from '../types/GameTypes.js';
-import  { GameStatus } from '../types/GameTypes.js';
+﻿import type { GameState, GameConfig, AttackResult } from '../types/GameTypes.js';
+import { GameStatus } from '../types/GameTypes.js';
 import { BoardManager } from './Board.js';
 
 export class GameStateManager {
@@ -38,7 +37,6 @@ export class GameStateManager {
     this.gameState.gameStatus = GameStatus.PLAYING;
     this.gameState.currentTurn = 1;
     this.gameState.selectedUnit = null;
-    // Reinitialize the board for a fresh game
     this.gameState.board = this.boardManager.initializeBoard();
   }
 
@@ -50,14 +48,79 @@ export class GameStateManager {
       return false;
     }
 
-    // Deselect previously selected unit
     this.deselectAllUnits();
-
-    // Select the new unit
     unitManager.selectUnit(unit);
     this.gameState.selectedUnit = unit;
 
     return true;
+  }
+
+  public attemptAttack(targetRow: number, targetCol: number): AttackResult | null {
+    if (!this.gameState.selectedUnit) {
+      return null;
+    }
+
+    const target = this.gameState.board[targetRow][targetCol];
+    if (!target) {
+      return null;
+    }
+
+    const unitManager = this.boardManager.getUnitManager();
+    const result = unitManager.performAttack(this.gameState.selectedUnit, target);
+
+    if (result.success) {
+      this.gameState.selectedUnit = null;
+
+      // Check if the game should end
+      this.checkGameOver();
+
+      // Check if turn should end automatically
+      this.checkAutoEndTurn();
+    }
+
+    return result;
+  }
+
+  private checkGameOver(): void {
+    const aliveTeams = this.getAliveTeams();
+
+    if (aliveTeams.team1 === 0) {
+      this.gameState.gameStatus = GameStatus.GAME_OVER;
+    } else if (aliveTeams.team2 === 0) {
+      this.gameState.gameStatus = GameStatus.GAME_OVER;
+    }
+  }
+
+  private checkAutoEndTurn(): void {
+    const unitManager = this.boardManager.getUnitManager();
+    const activeUnits = unitManager.getAllActiveUnits(
+        this.gameState.board,
+        this.gameState.currentTurn,
+        this.config.BOARD_ROWS,
+        this.config.BOARD_COLS
+    );
+
+    // If no units can act, automatically end turn
+    if (activeUnits.length === 0) {
+      setTimeout(() => {
+        this.switchTurn();
+      }, 1000); // Small delay to show the attack result
+    }
+  }
+
+  public getAliveTeams(): { team1: number; team2: number } {
+    return this.boardManager.countAliveUnits(this.gameState.board);
+  }
+
+  public canEndTurn(): boolean {
+    const unitManager = this.boardManager.getUnitManager();
+    const activeUnits = unitManager.getAllActiveUnits(
+        this.gameState.board,
+        this.gameState.currentTurn,
+        this.config.BOARD_ROWS,
+        this.config.BOARD_COLS
+    );
+    return activeUnits.length === 0;
   }
 
   public deselectAllUnits(): void {
@@ -89,7 +152,6 @@ export class GameStateManager {
     const boardEndX = boardStartX + this.config.BOARD_COLS * this.gameState.cellWidth;
     const boardEndY = boardStartY + this.config.BOARD_ROWS * this.gameState.cellHeight;
 
-    // Check if click is within board bounds
     if (pixelX < boardStartX || pixelX > boardEndX ||
         pixelY < boardStartY || pixelY > boardEndY) {
       return null;
@@ -124,7 +186,18 @@ export class GameStateManager {
 
   public switchTurn(): void {
     this.gameState.currentTurn = this.gameState.currentTurn === 1 ? 2 : 1;
-    this.deselectAllUnits(); // Deselect units when switching turns
+    this.deselectAllUnits();
+
+    // Reset activity for all units of the new team
+    const unitManager = this.boardManager.getUnitManager();
+    for (let row = 0; row < this.config.BOARD_ROWS; row++) {
+      for (let col = 0; col < this.config.BOARD_COLS; col++) {
+        const unit = this.gameState.board[row][col];
+        if (unit) {
+          unitManager.resetUnitActivity(unit);
+        }
+      }
+    }
   }
 
   public getBoardManager(): BoardManager {
