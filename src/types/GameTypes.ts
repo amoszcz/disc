@@ -1,5 +1,4 @@
-﻿
-export enum UnitType {
+﻿export enum UnitType {
   ARCHER = 'archer',
   MAGE = 'mage',
   PRIEST = 'priest',
@@ -28,6 +27,7 @@ export interface GameState {
   gameStatus: GameStatus;
   currentTurn: 1 | 2;
   selectedUnit: Unit | null;
+  availableTargets: BoardPosition[]; // New field for highlighting
 }
 
 export enum GameStatus {

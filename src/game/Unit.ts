@@ -1,4 +1,5 @@
-﻿import type { Unit, GameConfig, AttackResult, UnitType } from '../types/GameTypes.js';
+﻿
+import type { Unit, GameConfig, AttackResult, UnitType, BoardPosition } from '../types/GameTypes.js';
 import { UnitType as UnitTypeEnum } from '../types/GameTypes.js';
 import { AttackStrategyFactory } from '../strategy/AttackStrategyFactory.js';
 
@@ -102,6 +103,20 @@ export class UnitManager {
         }
 
         return activeUnits;
+    }
+
+    public getAvailableTargets(attacker: Unit, board: (Unit | null)[][], boardRows: number, boardCols: number): BoardPosition[] {
+        const targets: BoardPosition[] = [];
+
+        for (let row = 0; row < boardRows; row++) {
+            for (let col = 0; col < boardCols; col++) {
+                if (this.canAttackTarget(attacker, row, col, board)) {
+                    targets.push({ row, col });
+                }
+            }
+        }
+
+        return targets;
     }
 
     public getUnitTypeDisplayName(type: UnitType): string {

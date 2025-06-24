@@ -19,7 +19,8 @@ export class GameStateManager {
       boardOffsetY: 0,
       gameStatus: GameStatus.MENU,
       currentTurn: 1,
-      selectedUnit: null
+      selectedUnit: null,
+      availableTargets: [] // Initialize empty targets
     };
   }
 
@@ -37,6 +38,7 @@ export class GameStateManager {
     this.gameState.gameStatus = GameStatus.PLAYING;
     this.gameState.currentTurn = 1;
     this.gameState.selectedUnit = null;
+    this.gameState.availableTargets = [];
     this.gameState.board = this.boardManager.initializeBoard();
   }
 
@@ -52,7 +54,24 @@ export class GameStateManager {
     unitManager.selectUnit(unit);
     this.gameState.selectedUnit = unit;
 
+    // Update available targets when a unit is selected
+    this.updateAvailableTargets();
+
     return true;
+  }
+
+  private updateAvailableTargets(): void {
+    if (this.gameState.selectedUnit) {
+      const unitManager = this.boardManager.getUnitManager();
+      this.gameState.availableTargets = unitManager.getAvailableTargets(
+          this.gameState.selectedUnit,
+          this.gameState.board,
+          this.config.BOARD_ROWS,
+          this.config.BOARD_COLS
+      );
+    } else {
+      this.gameState.availableTargets = [];
+    }
   }
 
   public attemptAttack(targetRow: number, targetCol: number): AttackResult | null {
@@ -84,6 +103,7 @@ export class GameStateManager {
 
     if (result.success) {
       this.gameState.selectedUnit = null;
+      this.gameState.availableTargets = []; // Clear targets after attack
       this.checkGameOver();
       this.checkAutoEndTurn();
     }
@@ -145,6 +165,7 @@ export class GameStateManager {
     }
 
     this.gameState.selectedUnit = null;
+    this.gameState.availableTargets = []; // Clear targets when deselecting
   }
 
   public getUnitAt(row: number, col: number): Unit | null {

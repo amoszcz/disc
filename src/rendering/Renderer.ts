@@ -18,7 +18,9 @@ export class Renderer {
     public render(ctx: CanvasRenderingContext2D, gameState: GameState, canvasWidth: number, canvasHeight: number): void {
         // Only draw board and units when playing
         if (gameState.gameStatus === 'playing' || gameState.gameStatus === 'paused' || gameState.gameStatus === 'game_over') {
+            // Draw board first (includes target highlights)
             this.boardRenderer.drawBoard(ctx, gameState);
+            // Then draw units on top
             this.unitRenderer.drawUnits(ctx, gameState);
         }
 
