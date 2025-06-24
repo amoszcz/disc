@@ -1,10 +1,10 @@
-﻿import type { GameState, GameConfig, AttackResult } from '../types/GameTypes.js';
+﻿import type { GameState, GameConfig, AttackResult, Unit } from '../types/GameTypes.js';
 import { GameStatus } from '../types/GameTypes.js';
 import { BoardManager } from './Board.js';
 
 export class GameStateManager {
   private config: GameConfig;
-  private boardManager: BoardManager;
+  private readonly boardManager: BoardManager;
   public gameState: GameState;
 
   constructor(config: GameConfig) {
@@ -147,7 +147,7 @@ export class GameStateManager {
     this.gameState.selectedUnit = null;
   }
 
-  public getUnitAt(row: number, col: number): any {
+  public getUnitAt(row: number, col: number): Unit | null {
     if (row >= 0 && row < this.config.BOARD_ROWS &&
         col >= 0 && col < this.config.BOARD_COLS) {
       return this.gameState.board[row][col];
