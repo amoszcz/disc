@@ -19,21 +19,50 @@ export class UnitRenderer {
                 const centerX = gameState.boardOffsetX + col * gameState.cellWidth + gameState.cellWidth / 2;
                 const centerY = gameState.boardOffsetY + row * gameState.cellHeight + gameState.cellHeight / 2;
 
-                this.drawUnit(ctx, unit, centerX, centerY);
+                // Draw selection highlight first (behind the unit)
+                if (unit.isSelected) {
+                    this.drawSelectionHighlight(ctx, centerX, centerY);
+                }
+
+                this.drawUnit(ctx, unit, centerX, centerY, gameState.currentTurn);
                 this.drawHealthBar(ctx, unit, centerX, centerY);
                 this.drawUnitStats(ctx, unit, centerX, centerY);
             }
         }
     }
 
-    private drawUnit(ctx: CanvasRenderingContext2D, unit: Unit, centerX: number, centerY: number): void {
+    private drawSelectionHighlight(ctx: CanvasRenderingContext2D, centerX: number, centerY: number): void {
+        // Draw outer selection ring with pulsing effect
+        const time = Date.now() / 1000;
+        const pulseRadius = this.config.UNIT_RADIUS + 8 + Math.sin(time * 4) * 3;
+
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, pulseRadius, 0, 2 * Math.PI);
+        ctx.strokeStyle = '#ffff00'; // Yellow highlight
+        ctx.lineWidth = 4;
+        ctx.stroke();
+
+        // Draw inner selection ring
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, this.config.UNIT_RADIUS + 5, 0, 2 * Math.PI);
+        ctx.strokeStyle = '#ffd700'; // Gold highlight
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    }
+
+    private drawUnit(ctx: CanvasRenderingContext2D, unit: Unit, centerX: number, centerY: number, currentTurn: 1 | 2): void {
         // Draw unit circle
         ctx.beginPath();
         ctx.arc(centerX, centerY, this.config.UNIT_RADIUS, 0, 2 * Math.PI);
 
         // Different colors for each team, with opacity based on health
         const healthPercent = this.unitManager.getHealthPercentage(unit);
-        const alpha = Math.max(0.3, healthPercent);
+        let alpha = Math.max(0.3, healthPercent);
+
+        // Slightly dim non-active team units
+        if (unit.team !== currentTurn) {
+            alpha *= 0.7;
+        }
 
         if (unit.team === 1) {
             ctx.fillStyle = `rgba(74, 144, 226, ${alpha})`;
@@ -42,10 +71,19 @@ export class UnitRenderer {
         }
         ctx.fill();
 
-        // Draw unit border
+        // Draw unit border - thicker for selected units
         ctx.strokeStyle = unit.team === 1 ? '#2c5282' : '#c53030';
-        ctx.lineWidth = 3;
+        ctx.lineWidth = unit.isSelected ? 5 : 3;
         ctx.stroke();
+
+        // Add a subtle glow effect for selectable units of current team
+        if (unit.team === currentTurn && !unit.isSelected) {
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, this.config.UNIT_RADIUS + 2, 0, 2 * Math.PI);
+            ctx.strokeStyle = unit.team === 1 ? 'rgba(74, 144, 226, 0.3)' : 'rgba(226, 74, 74, 0.3)';
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        }
     }
 
     private drawHealthBar(ctx: CanvasRenderingContext2D, unit: Unit, centerX: number, centerY: number): void {
@@ -78,10 +116,22 @@ export class UnitRenderer {
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
 
+        // Add shadow for better readability
+        ctx.shadowColor = 'black';
+        ctx.shadowBlur = 2;
+        ctx.shadowOffsetX = 1;
+        ctx.shadowOffsetY = 1;
+
         // Draw ATT value
         ctx.fillText(`ATT:${unit.att}`, centerX, centerY - 5);
 
         // Draw LIF value
         ctx.fillText(`LIF:${unit.lif}`, centerX, centerY + 8);
+
+        // Reset shadow
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
     }
 }

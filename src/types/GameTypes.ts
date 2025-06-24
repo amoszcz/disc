@@ -6,6 +6,7 @@
   lif: number;  // Life points (current health)
   maxLif: number; // Maximum life points
   isAlive: boolean;
+  isSelected: boolean; // New property for selection state
 }
 
 export interface GameState {
@@ -16,6 +17,7 @@ export interface GameState {
   boardOffsetY: number;
   gameStatus: GameStatus;
   currentTurn: 1 | 2;
+  selectedUnit: Unit | null; // Currently selected unit
 }
 
 export enum GameStatus {

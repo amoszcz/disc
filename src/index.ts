@@ -46,7 +46,7 @@ class Game {
       this.gameStateManager.startGame();
     });
 
-    // Mouse events for button interactions
+    // Mouse events for button interactions and unit selection
     if (this.canvasManager.canvas) {
       this.canvasManager.canvas.addEventListener('mousemove', (event) => {
         this.handleMouseMove(event);
@@ -81,8 +81,39 @@ class Game {
     const mouseX = event.clientX - rect.left;
     const mouseY = event.clientY - rect.top;
 
+    // First check if a UI button was clicked
     const buttonManager = this.renderer.getUIRenderer().getButtonManager();
-    buttonManager.handleMouseClick(mouseX, mouseY);
+    const buttonClicked = buttonManager.handleMouseClick(mouseX, mouseY);
+
+    // If no button was clicked and we're in playing state, handle unit selection
+    if (!buttonClicked && this.gameStateManager.gameState.gameStatus === 'playing') {
+      this.handleUnitSelection(mouseX, mouseY);
+    }
+  }
+
+  private handleUnitSelection(mouseX: number, mouseY: number): void {
+    const boardPos = this.gameStateManager.getBoardPositionFromPixels(mouseX, mouseY);
+
+    if (boardPos) {
+      // Click was on the board
+      const unit = this.gameStateManager.getUnitAt(boardPos.row, boardPos.col);
+
+      if (unit) {
+        // Clicked on a unit - try to select it
+        const wasSelected = this.gameStateManager.selectUnit(boardPos.row, boardPos.col);
+
+        if (!wasSelected) {
+          // Unit couldn't be selected (wrong team or dead), deselect all
+          this.gameStateManager.deselectAllUnits();
+        }
+      } else {
+        // Clicked on empty cell, deselect all units
+        this.gameStateManager.deselectAllUnits();
+      }
+    } else {
+      // Click was outside the board, deselect all units
+      this.gameStateManager.deselectAllUnits();
+    }
   }
 
   private handleKeyDown(event: KeyboardEvent): void {
@@ -97,6 +128,11 @@ class Game {
           this.gameStateManager.pauseGame();
         } else if (this.gameStateManager.gameState.gameStatus === 'paused') {
           this.gameStateManager.resumeGame();
+        }
+        break;
+      case ' ': // Spacebar to switch turns (for testing)
+        if (this.gameStateManager.gameState.gameStatus === 'playing') {
+          this.gameStateManager.switchTurn();
         }
         break;
     }

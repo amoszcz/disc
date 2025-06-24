@@ -15,7 +15,8 @@ export class UnitManager {
             att: this.config.DEFAULT_ATT,
             lif: this.config.DEFAULT_LIF,
             maxLif: this.config.DEFAULT_LIF,
-            isAlive: true
+            isAlive: true,
+            isSelected: false
         };
     }
 
@@ -28,6 +29,7 @@ export class UnitManager {
         if (unit.lif <= 0) {
             unit.isAlive = false;
             unit.lif = 0;
+            unit.isSelected = false; // Deselect dead units
         }
     }
 
@@ -37,5 +39,17 @@ export class UnitManager {
 
     public isUnitAlive(unit: Unit | null): unit is Unit {
         return unit !== null && unit.isAlive;
+    }
+
+    public selectUnit(unit: Unit): void {
+        unit.isSelected = true;
+    }
+
+    public deselectUnit(unit: Unit): void {
+        unit.isSelected = false;
+    }
+
+    public canSelectUnit(unit: Unit, currentTeam: 1 | 2): boolean {
+        return unit.isAlive && unit.team === currentTeam;
     }
 }
