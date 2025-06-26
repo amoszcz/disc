@@ -1,6 +1,11 @@
-﻿import type { GameState, GameConfig, AttackResult, Unit } from '../types/GameTypes.js';
-import { GameStatus } from '../types/GameTypes.js';
-import { BoardManager } from './Board.js';
+﻿import type {
+  GameState,
+  GameConfig,
+  AttackResult,
+  Unit,
+} from "../types/GameTypes.js";
+import { GameStatus } from "../types/GameTypes.js";
+import { BoardManager } from "./Board.js";
 
 export class GameStateManager {
   private config: GameConfig;
@@ -20,7 +25,7 @@ export class GameStateManager {
       gameStatus: GameStatus.MENU,
       currentTurn: 1,
       selectedUnit: null,
-      availableTargets: [] // Initialize empty targets
+      availableTargets: [], // Initialize empty targets
     };
   }
 
@@ -64,46 +69,64 @@ export class GameStateManager {
     if (this.gameState.selectedUnit) {
       const unitManager = this.boardManager.getUnitManager();
       this.gameState.availableTargets = unitManager.getAvailableTargets(
-          this.gameState.selectedUnit,
-          this.gameState.board,
-          this.config.BOARD_ROWS,
-          this.config.BOARD_COLS
+        this.gameState.selectedUnit,
+        this.gameState.board,
+        this.config.BOARD_ROWS,
+        this.config.BOARD_COLS,
       );
     } else {
       this.gameState.availableTargets = [];
     }
   }
 
-  public attemptAttack(targetRow: number, targetCol: number): AttackResult | null {
+  public attemptAttack(
+    targetRow: number,
+    targetCol: number,
+  ): AttackResult | null {
     if (!this.gameState.selectedUnit) {
       return null;
     }
 
     const unitManager = this.boardManager.getUnitManager();
 
-    if (!unitManager.canAttackTarget(this.gameState.selectedUnit, targetRow, targetCol, this.gameState.board)) {
+    if (
+      !unitManager.canAttackTarget(
+        this.gameState.selectedUnit,
+        targetRow,
+        targetCol,
+        this.gameState.board,
+      )
+    ) {
       return {
         success: false,
         targets: [],
         totalDamage: 0,
         targetsKilled: 0,
         healingDone: 0,
-        message: "Cannot target this unit"
+        message: "Cannot target this unit",
       };
     }
 
     const result = unitManager.performAttack(
-        this.gameState.selectedUnit,
-        targetRow,
-        targetCol,
-        this.gameState.board,
-        this.config.BOARD_ROWS,
-        this.config.BOARD_COLS
+      this.gameState.selectedUnit,
+      targetRow,
+      targetCol,
+      this.gameState.board,
+      this.config.BOARD_ROWS,
+      this.config.BOARD_COLS,
     );
 
     if (result.success) {
+      result.targets.forEach((target) => {
+        unitManager.damageUnit(
+          target.unit,
+          result.attacker.att,
+          result.attacker,
+        );
+      });
       this.gameState.selectedUnit = null;
       this.gameState.availableTargets = []; // Clear targets after attack
+
       this.checkGameOver();
       this.checkAutoEndTurn();
     }
@@ -124,10 +147,10 @@ export class GameStateManager {
   private checkAutoEndTurn(): void {
     const unitManager = this.boardManager.getUnitManager();
     const activeUnits = unitManager.getAllActiveUnits(
-        this.gameState.board,
-        this.gameState.currentTurn,
-        this.config.BOARD_ROWS,
-        this.config.BOARD_COLS
+      this.gameState.board,
+      this.gameState.currentTurn,
+      this.config.BOARD_ROWS,
+      this.config.BOARD_COLS,
     );
 
     if (activeUnits.length === 0) {
@@ -144,10 +167,10 @@ export class GameStateManager {
   public canEndTurn(): boolean {
     const unitManager = this.boardManager.getUnitManager();
     const activeUnits = unitManager.getAllActiveUnits(
-        this.gameState.board,
-        this.gameState.currentTurn,
-        this.config.BOARD_ROWS,
-        this.config.BOARD_COLS
+      this.gameState.board,
+      this.gameState.currentTurn,
+      this.config.BOARD_ROWS,
+      this.config.BOARD_COLS,
     );
     return activeUnits.length === 0;
   }
@@ -169,21 +192,34 @@ export class GameStateManager {
   }
 
   public getUnitAt(row: number, col: number): Unit | null {
-    if (row >= 0 && row < this.config.BOARD_ROWS &&
-        col >= 0 && col < this.config.BOARD_COLS) {
+    if (
+      row >= 0 &&
+      row < this.config.BOARD_ROWS &&
+      col >= 0 &&
+      col < this.config.BOARD_COLS
+    ) {
       return this.gameState.board[row][col];
     }
     return null;
   }
 
-  public getBoardPositionFromPixels(pixelX: number, pixelY: number): { row: number; col: number } | null {
+  public getBoardPositionFromPixels(
+    pixelX: number,
+    pixelY: number,
+  ): { row: number; col: number } | null {
     const boardStartX = this.gameState.boardOffsetX;
     const boardStartY = this.gameState.boardOffsetY;
-    const boardEndX = boardStartX + this.config.BOARD_COLS * this.gameState.cellWidth;
-    const boardEndY = boardStartY + this.config.BOARD_ROWS * this.gameState.cellHeight;
+    const boardEndX =
+      boardStartX + this.config.BOARD_COLS * this.gameState.cellWidth;
+    const boardEndY =
+      boardStartY + this.config.BOARD_ROWS * this.gameState.cellHeight;
 
-    if (pixelX < boardStartX || pixelX > boardEndX ||
-        pixelY < boardStartY || pixelY > boardEndY) {
+    if (
+      pixelX < boardStartX ||
+      pixelX > boardEndX ||
+      pixelY < boardStartY ||
+      pixelY > boardEndY
+    ) {
       return null;
     }
 

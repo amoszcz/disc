@@ -1,5 +1,5 @@
-﻿import type { GameConfig } from './types/GameTypes.js';
-import { Game } from './core/Game.js';
+﻿import type { GameConfig } from "./types/GameTypes.js";
+import { Game } from "./core/Game.js";
 
 // Game configuration
 const CONFIG: GameConfig = {
@@ -8,19 +8,19 @@ const CONFIG: GameConfig = {
   CELL_SIZE: 120,
   UNIT_RADIUS: 35,
   DEFAULT_ATT: 25,
-  DEFAULT_LIF: 100
+  DEFAULT_LIF: 100,
 };
 
 // Initialize and start the game when page loads
-window.addEventListener('load', () => {
+window.addEventListener("load", () => {
   try {
-    const game = new Game(CONFIG, 'game');
+    const game = new Game(CONFIG, "game");
     const initialized = game.init();
 
     if (!initialized) {
-      console.error('Failed to initialize the game');
+      console.error("Failed to initialize the game");
     }
   } catch (error) {
-    console.error('Error starting the game:', error);
+    console.error("Error starting the game:", error);
   }
 });

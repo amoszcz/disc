@@ -1,8 +1,21 @@
-﻿export enum UnitType {
-  ARCHER = 'archer',
-  MAGE = 'mage',
-  PRIEST = 'priest',
-  KNIGHT = 'knight'  // New!
+﻿/**
+ * src/types/GameTypes.ts
+ * Defines the core types and interfaces used throughout the game
+ * Includes game state, unit properties, and various game-related enums and types
+ */
+
+export enum GameStatus {
+  MENU = "menu",
+  PLAYING = "playing",
+  PAUSED = "paused",
+  GAME_OVER = "game_over",
+}
+
+export enum UnitType {
+  ARCHER = "archer",
+  MAGE = "mage",
+  PRIEST = "priest",
+  KNIGHT = "knight",
 }
 
 export interface Unit {
@@ -16,39 +29,7 @@ export interface Unit {
   isSelected: boolean;
   hasActed: boolean;
   type: UnitType;
-}
-
-export interface GameState {
-  board: (Unit | null)[][];
-  cellWidth: number;
-  cellHeight: number;
-  boardOffsetX: number;
-  boardOffsetY: number;
-  gameStatus: GameStatus;
-  currentTurn: 1 | 2;
-  selectedUnit: Unit | null;
-  availableTargets: BoardPosition[]; // New field for highlighting
-}
-
-export enum GameStatus {
-  MENU = 'menu',
-  PLAYING = 'playing',
-  PAUSED = 'paused',
-  GAME_OVER = 'game_over'
-}
-
-export interface GameConfig {
-  BOARD_ROWS: number;
-  BOARD_COLS: number;
-  CELL_SIZE: number;
-  UNIT_RADIUS: number;
-  DEFAULT_ATT: number;
-  DEFAULT_LIF: number;
-}
-
-export interface TeamCount {
-  team1: number;
-  team2: number;
+  receivedDamageFrom: Unit | null;
 }
 
 export interface Button {
@@ -61,6 +42,32 @@ export interface Button {
   onClick: () => void;
 }
 
+export interface GameConfig {
+  BOARD_ROWS: number;
+  BOARD_COLS: number;
+  CELL_SIZE: number;
+  UNIT_RADIUS: number;
+  DEFAULT_ATT: number;
+  DEFAULT_LIF: number;
+}
+
+export interface GameState {
+  board: (Unit | null)[][];
+  cellWidth: number;
+  cellHeight: number;
+  boardOffsetX: number;
+  boardOffsetY: number;
+  gameStatus: GameStatus;
+  currentTurn: 1 | 2;
+  selectedUnit: Unit | null;
+  availableTargets: BoardPosition[];
+}
+
+export interface BoardPosition {
+  row: number;
+  col: number;
+}
+
 export interface AttackTarget {
   unit: Unit;
   row: number;
@@ -69,14 +76,10 @@ export interface AttackTarget {
 
 export interface AttackResult {
   success: boolean;
+  attacker: Unit;
   targets: AttackTarget[];
   totalDamage: number;
   targetsKilled: number;
   healingDone: number;
   message: string;
-}
-
-export interface BoardPosition {
-  row: number;
-  col: number;
 }

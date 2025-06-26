@@ -1,80 +1,85 @@
-﻿import type { GameConfig } from '../types/GameTypes.js';
-import { CanvasManager } from '../utils/Canvas.js';
-import { GameStateManager } from '../game/GameState.js';
-import { Renderer } from '../rendering/Renderer.js';
-import { InputManager } from '../input/InputManager.js';
-import { GameLoop } from './GameLoop.js';
+﻿import type { GameConfig } from "../types/GameTypes.js";
+import { CanvasManager } from "../utils/Canvas.js";
+import { GameStateManager } from "../game/GameState.js";
+import { Renderer } from "../rendering/Renderer.js";
+import { InputManager } from "../input/InputManager.js";
+import { GameLoop } from "./GameLoop.js";
 
 export class Game {
-    private readonly canvasManager: CanvasManager;
-    private readonly gameStateManager: GameStateManager;
-    private readonly renderer: Renderer;
-    private readonly inputManager: InputManager;
-    private readonly gameLoop: GameLoop;
-    private readonly config: GameConfig;
+  private readonly canvasManager: CanvasManager;
+  private readonly gameStateManager: GameStateManager;
+  private readonly renderer: Renderer;
+  private readonly inputManager: InputManager;
+  private readonly gameLoop: GameLoop;
+  private readonly config: GameConfig;
 
-    constructor(config: GameConfig, canvasId: string = 'game') {
-        this.config = config;
-        this.canvasManager = new CanvasManager(canvasId);
-        this.gameStateManager = new GameStateManager(config);
-        this.renderer = new Renderer(config, this.gameStateManager.getBoardManager().getUnitManager());
+  constructor(config: GameConfig, canvasId: string = "game") {
+    this.config = config;
+    this.canvasManager = new CanvasManager(canvasId);
+    this.gameStateManager = new GameStateManager(config);
+    this.renderer = new Renderer(
+      config,
+      this.gameStateManager.getBoardManager().getUnitManager(),
+    );
 
-        if (!this.canvasManager.canvas) {
-            throw new Error('Could not initialize canvas');
-        }
-
-        this.inputManager = new InputManager(
-            this.canvasManager.canvas,
-            this.gameStateManager,
-            this.renderer
-        );
-
-        this.gameLoop = new GameLoop(
-            this.canvasManager,
-            this.gameStateManager,
-            this.renderer,
-            this.inputManager
-        );
+    if (!this.canvasManager.canvas) {
+      throw new Error("Could not initialize canvas");
     }
 
-    public init(): boolean {
-        if (!this.canvasManager.isValid()) {
-            console.error('Could not initialize game: Canvas or context is not available');
-            return false;
-        }
+    this.inputManager = new InputManager(
+      this.canvasManager.canvas,
+      this.gameStateManager,
+      this.renderer,
+    );
 
-        this.setupWindowEvents();
-        this.resizeCanvas();
-        this.gameLoop.start();
+    this.gameLoop = new GameLoop(
+      this.canvasManager,
+      this.gameStateManager,
+      this.renderer,
+      this.inputManager,
+    );
+  }
 
-        return true;
+  public init(): boolean {
+    if (!this.canvasManager.isValid()) {
+      console.error(
+        "Could not initialize game: Canvas or context is not available",
+      );
+      return false;
     }
 
-    private setupWindowEvents(): void {
-        window.addEventListener('resize', () => this.resizeCanvas());
-    }
+    this.setupWindowEvents();
+    this.resizeCanvas();
+    this.gameLoop.start();
 
-    private resizeCanvas(): void {
-        this.canvasManager.resizeCanvas();
-        if (this.canvasManager.canvas) {
-            this.gameStateManager.calculateBoardLayout(
-                this.canvasManager.canvas.width,
-                this.canvasManager.canvas.height
-            );
-        }
-    }
+    return true;
+  }
 
-    public destroy(): void {
-        this.gameLoop.stop();
-        // Additional cleanup if needed
-    }
+  private setupWindowEvents(): void {
+    window.addEventListener("resize", () => this.resizeCanvas());
+  }
 
-    // Expose some methods for external access if needed
-    public getGameState(): GameStateManager {
-        return this.gameStateManager;
+  private resizeCanvas(): void {
+    this.canvasManager.resizeCanvas();
+    if (this.canvasManager.canvas) {
+      this.gameStateManager.calculateBoardLayout(
+        this.canvasManager.canvas.width,
+        this.canvasManager.canvas.height,
+      );
     }
+  }
 
-    public getRenderer(): Renderer {
-        return this.renderer;
-    }
+  public destroy(): void {
+    this.gameLoop.stop();
+    // Additional cleanup if needed
+  }
+
+  // Expose some methods for external access if needed
+  public getGameState(): GameStateManager {
+    return this.gameStateManager;
+  }
+
+  public getRenderer(): Renderer {
+    return this.renderer;
+  }
 }
