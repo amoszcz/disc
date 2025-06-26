@@ -104,6 +104,7 @@ export class GameStateManager {
         targets: [],
         totalDamage: 0,
         targetsKilled: 0,
+        attacker: this.gameState.selectedUnit,
         healingDone: 0,
         message: "Cannot target this unit",
       };
