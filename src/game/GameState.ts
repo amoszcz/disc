@@ -45,6 +45,8 @@ export class GameStateManager {
     this.gameState.selectedUnit = null;
     this.gameState.availableTargets = [];
     this.gameState.board = this.boardManager.initializeBoard();
+
+    this.markInactiveUnitsWhenNoTargets();
   }
 
   public selectUnit(row: number, col: number): boolean {
@@ -253,7 +255,34 @@ export class GameStateManager {
   public switchTurn(): void {
     this.gameState.currentTurn = this.gameState.currentTurn === 1 ? 2 : 1;
     this.deselectAllUnits();
+    this.resetAllUnits();
+    this.markInactiveUnitsWhenNoTargets();
+  }
 
+  private markInactiveUnitsWhenNoTargets(): void {
+    const unitManager = this.boardManager.getUnitManager();
+    for (let row = 0; row < this.config.BOARD_ROWS; row++) {
+      for (let col = 0; col < this.config.BOARD_COLS; col++) {
+        const unit = this.gameState.board[row][col];
+        if (unit && unit.team === this.gameState.currentTurn) {
+          // Check if unit has any valid targets
+          const availableTargets = unitManager.getAvailableTargets(
+            unit,
+            this.gameState.board,
+            this.config.BOARD_ROWS,
+            this.config.BOARD_COLS,
+          );
+
+          // If no valid targets, mark unit as inactive
+          if (availableTargets.length === 0) {
+            unit.hasActed = true;
+          }
+        }
+      }
+    }
+  }
+
+  private resetAllUnits(): void {
     const unitManager = this.boardManager.getUnitManager();
     for (let row = 0; row < this.config.BOARD_ROWS; row++) {
       for (let col = 0; col < this.config.BOARD_COLS; col++) {
