@@ -20,6 +20,7 @@ export interface UnitVisualConfig {
 }
 
 export interface UnitRenderStrategy {
+  
   getVisualConfig(): UnitVisualConfig;
   drawUnitShape(
     ctx: CanvasRenderingContext2D,

@@ -1,0 +1,28 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+    <!-- Body armor -->
+    <circle cx="50" cy="60" r="28" fill="#C0C0C0" stroke="#696969" stroke-width="2"/>
+
+    <!-- Head -->
+    <circle cx="50" cy="25" r="12" fill="#FDBCB4"/>
+
+    <!-- Helmet -->
+    <path d="M38 25 Q50 10 62 25 L62 35 Q50 40 38 35 Z" fill="#C0C0C0" stroke="#696969" stroke-width="2"/>
+
+    <!-- Visor -->
+    <rect x="42" y="22" width="16" height="8" fill="#000000" opacity="0.8"/>
+
+    <!-- Shield -->
+    <path d="M15 40 Q10 50 15 70 Q25 75 25 60 Q25 45 15 40 Z" fill="#B8860B" data-team-color="primary"/>
+    <line x1="20" y1="45" x2="20" y2="65" stroke="#FFD700" stroke-width="2"/>
+
+    <!-- Sword -->
+    <rect x="82" y="30" width="4" height="35" fill="#C0C0C0"/>
+    <rect x="80" y="27" width="8" height="6" fill="#8B4513"/>
+    <circle cx="84" cy="24" r="3" fill="#FFD700"/>
+
+    <!-- Team color accent on armor -->
+    <circle cx="50" cy="50" r="8" data-team-color="accent"/>
+
+    <!-- Health indicator -->
+    <rect x="35" y="90" width="30" height="5" fill="#FF0000" data-health-indicator="true"/>
+</svg>

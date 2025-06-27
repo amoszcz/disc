@@ -1,0 +1,21 @@
+﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+    <!-- Body -->
+    <circle cx="50" cy="60" r="25" fill="#8B4513" data-team-color="primary"/>
+
+    <!-- Head -->
+    <circle cx="50" cy="30" r="15" fill="#FDBCB4"/>
+
+    <!-- Bow -->
+    <path d="M20 40 Q15 50 20 60" stroke="#8B4513" stroke-width="3" fill="none"/>
+    <line x1="20" y1="45" x2="20" y2="55" stroke="#654321" stroke-width="2"/>
+
+    <!-- Arrow -->
+    <line x1="25" y1="50" x2="45" y2="50" stroke="#8B4513" stroke-width="2"/>
+    <polygon points="43,48 47,50 43,52" fill="#C0C0C0"/>
+
+    <!-- Health indicator -->
+    <rect x="35" y="85" width="30" height="5" fill="#FF0000" data-health-indicator="true"/>
+
+    <!-- Team color accent -->
+    <circle cx="50" cy="30" r="3" data-team-color="accent"/>
+</svg>

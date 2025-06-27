@@ -1,0 +1,56 @@
+﻿{
+  "archer": {
+    "team1Color": "74, 144, 226",
+    "team2Color": "226, 74, 74",
+    "symbol": "🏹",
+    "svgPath": "/src/assets/units/archer.svg",
+    "strokeColor": {
+      "team1": "#2c5282",
+      "team2": "#c53030"
+    },
+    "specialEffects": {
+      "crosshairColor": "rgba(255, 255, 255, 0.8)"
+    }
+  },
+  "mage": {
+    "team1Color": "128, 90, 213",
+    "team2Color": "213, 90, 128",
+    "symbol": "🔮",
+    "svgPath": "/src/assets/units/mage.svg",
+    "strokeColor": {
+      "team1": "#553c9a",
+      "team2": "#9a3c55"
+    },
+    "specialEffects": {
+      "auraColor": "rgba(128, 90, 213, 0.3)",
+      "glowIntensity": 0.8
+    }
+  },
+  "knight": {
+    "team1Color": "184, 134, 11",
+    "team2Color": "239, 68, 68",
+    "symbol": "⚔️",
+    "svgPath": "/src/assets/units/knight.svg",
+    "strokeColor": {
+      "team1": "#92400e",
+      "team2": "#dc2626"
+    },
+    "specialEffects": {
+      "glowIntensity": 1.0
+    }
+  },
+  "priest": {
+    "team1Color": "34, 197, 94",
+    "team2Color": "239, 68, 68",
+    "symbol": "✚",
+    "svgPath": "/src/assets/units/priest.svg",
+    "strokeColor": {
+      "team1": "#16a34a",
+      "team2": "#dc2626"
+    },
+    "specialEffects": {
+      "auraColor": "rgba(34, 197, 94, 0.4)",
+      "particleCount": 8
+    }
+  }
+}

@@ -1,0 +1,25 @@
+﻿
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
+    <!-- Robe -->
+    <circle cx="50" cy="65" r="30" fill="#4A0E4E" data-team-color="primary"/>
+
+    <!-- Head -->
+    <circle cx="50" cy="25" r="12" fill="#FDBCB4"/>
+
+    <!-- Hat -->
+    <polygon points="40,25 50,5 60,25" fill="#4A0E4E" data-team-color="primary"/>
+    <circle cx="50" cy="5" r="3" fill="#FFD700"/>
+
+    <!-- Staff -->
+    <line x1="75" y1="20" x2="75" y2="80" stroke="#8B4513" stroke-width="4"/>
+
+    <!-- Crystal orb -->
+    <circle cx="75" cy="15" r="8" fill="#9370DB" data-team-color="accent"/>
+    <circle cx="75" cy="15" r="5" fill="#ADD8E6" opacity="0.7"/>
+
+    <!-- Magic aura -->
+    <circle cx="50" cy="50" r="35" fill="none" stroke="#9370DB" stroke-width="2" opacity="0.3" data-team-color="stroke"/>
+
+    <!-- Health indicator -->
+    <rect x="35" y="90" width="30" height="5" fill="#FF0000" data-health-indicator="true"/>
+</svg>

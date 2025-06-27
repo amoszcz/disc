@@ -1,4 +1,4 @@
-﻿import type { Unit, GameState, GameConfig } from "../types/GameTypes.js";
+﻿import {Unit, GameState, GameConfig, UnitType} from "../types/GameTypes.js";
 import { UnitManager } from "../game/Unit.js";
 import { UnitRenderStrategyFactory } from "./strategy/UnitRenderStrategyFactory.js";
 import { DamageEffectManager } from "./effects/DamageEffectManager.js";
@@ -95,7 +95,7 @@ export class UnitRenderer {
     currentTurn: 1 | 2,
   ): void {
     const strategy = UnitRenderStrategyFactory.getStrategy(unit.type);
-
+ 
     // Draw the unit shape using the strategy
     strategy.drawUnitShape(ctx, unit, centerX, centerY, this.config);
 
@@ -176,13 +176,13 @@ export class UnitRenderer {
   }
 
   private drawUnitStats(
-    ctx: CanvasRenderingContext2D,
-    unit: Unit,
-    centerX: number,
-    centerY: number,
+      ctx: CanvasRenderingContext2D,
+      unit: Unit,
+      centerX: number,
+      centerY: number,
   ): void {
     ctx.fillStyle = "white";
-    ctx.font = "bold 12px Arial";
+    ctx.font = "bold 9px Arial";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
 
@@ -191,8 +191,13 @@ export class UnitRenderer {
     ctx.shadowOffsetX = 1;
     ctx.shadowOffsetY = 1;
 
-    ctx.fillText(`ATT:${unit.att}`, centerX, centerY - 5);
-    ctx.fillText(`LIF:${unit.lif}`, centerX, centerY + 8);
+    // Position stats below the unit and type symbol
+    const statsY = centerY + this.config.UNIT_RADIUS + 25;
+    const spacing = 25; // Horizontal spacing between ATT and LIF
+
+    // Draw ATT on the left, LIF on the right
+    ctx.fillText(`ATT:${unit.att}`, centerX - spacing, statsY);
+    ctx.fillText(`LIF:${unit.lif}`, centerX + spacing, statsY);
 
     ctx.shadowColor = "transparent";
     ctx.shadowBlur = 0;
