@@ -1,28 +1,55 @@
-﻿<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" width="100" height="100">
-    <!-- Body armor -->
-    <circle cx="50" cy="60" r="28" fill="#C0C0C0" stroke="#696969" stroke-width="2"/>
+﻿<svg width="800px" height="800px" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
 
-    <!-- Head -->
-    <circle cx="50" cy="25" r="12" fill="#FDBCB4"/>
+    <defs>
 
-    <!-- Helmet -->
-    <path d="M38 25 Q50 10 62 25 L62 35 Q50 40 38 35 Z" fill="#C0C0C0" stroke="#696969" stroke-width="2"/>
+        <style>.cls-1{fill:#ff927d;}.cls-1,.cls-2,.cls-3,.cls-4,.cls-5,.cls-6{stroke:#54596e;stroke-linecap:round;stroke-linejoin:round;stroke-width:2px;}.cls-2{fill:#d8d8d8;}.cls-3{fill:#ffd578;}.cls-4{fill:#a1b7ff;}.cls-5{fill:none;}.cls-6{fill:#55a6ff;}</style>
 
-    <!-- Visor -->
-    <rect x="42" y="22" width="16" height="8" fill="#000000" opacity="0.8"/>
+    </defs>
 
-    <!-- Shield -->
-    <path d="M15 40 Q10 50 15 70 Q25 75 25 60 Q25 45 15 40 Z" fill="#B8860B" data-team-color="primary"/>
-    <line x1="20" y1="45" x2="20" y2="65" stroke="#FFD700" stroke-width="2"/>
+    <title>knight</title>
 
-    <!-- Sword -->
-    <rect x="82" y="30" width="4" height="35" fill="#C0C0C0"/>
-    <rect x="80" y="27" width="8" height="6" fill="#8B4513"/>
-    <circle cx="84" cy="24" r="3" fill="#FFD700"/>
+    <g id="knight">
 
-    <!-- Team color accent on armor -->
-    <circle cx="50" cy="50" r="8" data-team-color="accent"/>
+        <polygon class="cls-1" points="13 27 7 27 7 13 13 9 13 27"/>
 
-    <!-- Health indicator -->
-    <rect x="35" y="90" width="30" height="5" fill="#FF0000" data-health-indicator="true"/>
+        <path class="cls-2" d="M45.43,50H21.29C17.82,50,15,52.51,15,55.62L5,62H61L51,55C51,52.23,48.51,50,45.43,50Z"/>
+
+        <path class="cls-1" d="M19.91,1A12.91,12.91,0,0,0,7,13.91v7A12.91,12.91,0,0,1,19.91,8H32V21h6V1Z"/>
+
+        <path class="cls-3" d="M23,41H43a0,0,0,0,1,0,0v8.3A3.7,3.7,0,0,1,39.3,53H26.7A3.7,3.7,0,0,1,23,49.3V41A0,0,0,0,1,23,41Z"/>
+
+        <path class="cls-3" d="M33,49h0A17,17,0,0,0,50,32S45.12,9,39.09,9H26.91C20.88,9,16,32,16,32A17,17,0,0,0,33,49Z"/>
+
+        <path  class="cls-4" data-team-color="primary" d="M33,7h0A17,17,0,0,1,50,24v5a0,0,0,0,1,0,0H16a0,0,0,0,1,0,0V24A17,17,0,0,1,33,7Z"/>
+
+        <polygon class="cls-2" data-team-color="accent"  points="33 17.23 13 29 33 37.23 53 29 33 17.23"/>
+
+        <line class="cls-5" x1="27" y1="25" x2="27" y2="30"/>
+
+        <line class="cls-5" x1="39" y1="25" x2="39" y2="30"/>
+
+        <line class="cls-5" x1="24" y1="27" x2="24" y2="29"/>
+
+        <line class="cls-5" x1="42" y1="27" x2="42" y2="29"/>
+
+        <line class="cls-5" x1="30" y1="24" x2="30" y2="31"/>
+
+        <line class="cls-5" x1="36" y1="24" x2="36" y2="31"/>
+
+        <line class="cls-5" x1="33" y1="22" x2="33" y2="33"/>
+
+        <line class="cls-5" x1="29" y1="41" x2="37" y2="41"/>
+
+        <path class="cls-4" d="M43,62a10,10,0,0,0-20,0Z"/>
+
+        <path class="cls-6" d="M39,62a6,6,0,0,0-12,0Z"/>
+
+        <path class="cls-4" d="M18.5,45.5h0a0,0,0,0,1,0,0v2a14,14,0,0,1-14,14h0a0,0,0,0,1,0,0v-2A14,14,0,0,1,18.5,45.5Z"/>
+
+        <path class="cls-4" d="M47,46h0A14,14,0,0,1,61,60v2a0,0,0,0,1,0,0h0A14,14,0,0,1,47,48V46A0,0,0,0,1,47,46Z" transform="translate(108 108) rotate(180)"/>
+
+        <line class="cls-5" x1="27" y1="4" x2="27" y2="8"/>
+
+    </g>
+
 </svg>
