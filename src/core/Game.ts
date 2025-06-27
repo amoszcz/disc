@@ -4,6 +4,7 @@ import { GameStateManager } from "../game/GameState.js";
 import { Renderer } from "../rendering/Renderer.js";
 import { InputManager } from "../input/InputManager.js";
 import { GameLoop } from "./GameLoop.js";
+import {AssetManager} from "../utils/AssetManager";
 
 export class Game {
   private readonly canvasManager: CanvasManager;
@@ -40,13 +41,14 @@ export class Game {
     );
   }
 
-  public init(): boolean {
+  public async init() {
     if (!this.canvasManager.isValid()) {
       console.error(
         "Could not initialize game: Canvas or context is not available",
       );
       return false;
     }
+    await AssetManager.getInstance().initializeAssets();
 
     this.setupWindowEvents();
     this.resizeCanvas();
@@ -71,6 +73,7 @@ export class Game {
 
   public destroy(): void {
     this.gameLoop.stop();
+    AssetManager.getInstance().clearAssets();
     // Additional cleanup if needed
   }
 

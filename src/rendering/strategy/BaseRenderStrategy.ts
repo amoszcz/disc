@@ -1,38 +1,24 @@
-﻿import type { Unit, GameConfig } from '../../types/GameTypes.js';
-import type { UnitVisualConfig, LoadedSvgData } from '../../config/RenderConfig.js';
+﻿
+import type { Unit, GameConfig } from '../../types/GameTypes.js';
+import type { UnitVisualConfig } from '../../config/RenderConfig.js';
 import { ConfigLoader } from '../../config/ConfigLoader.js';
-import { SvgLoader } from '../../utils/SvgLoader.js';
-import { SvgRenderer } from '../../utils/SvgRenderer.js';
+import { AssetManager } from '../../utils/AssetManager.js';
+import { SyncSvgRenderer } from '../../utils/SyncSvgRenderer.js';
 import type { UnitRenderStrategy } from './UnitRenderStrategy.js';
 
 export abstract class BaseRenderStrategy implements UnitRenderStrategy {
     protected configLoader: ConfigLoader;
-    protected svgLoader: SvgLoader;
+    protected assetManager: AssetManager;
     protected unitType: string;
-    protected svgData: LoadedSvgData | null = null;
-    protected svgRenderer: SvgRenderer | null = null;
 
     constructor(unitType: string) {
         this.configLoader = ConfigLoader.getInstance();
-        this.svgLoader = SvgLoader.getInstance();
+        this.assetManager = AssetManager.getInstance();
         this.unitType = unitType;
     }
 
     public getVisualConfig(): UnitVisualConfig {
         return this.configLoader.getUnitRenderConfig(this.unitType);
-    }
-
-    public async initializeSvg(canvas: HTMLCanvasElement): Promise<void> {
-        const visualConfig = this.getVisualConfig();
-
-        try {
-            this.svgData = await this.svgLoader.loadSvg(visualConfig.svgPath);
-            this.svgRenderer = new SvgRenderer(canvas);
-        } catch (error) {
-            console.warn(`Failed to load SVG for ${this.unitType}:`, error);
-            this.svgData = null;
-            this.svgRenderer = null;
-        }
     }
 
     public drawUnitShape(
@@ -43,29 +29,27 @@ export abstract class BaseRenderStrategy implements UnitRenderStrategy {
         config: GameConfig,
     ): void {
         const visualConfig = this.getVisualConfig();
+        const asset = this.assetManager.getAsset(unit.type);
 
-        if (this.svgData && this.svgRenderer) {
-            debugger;
-            // Use SVG rendering
-            const baseColor = unit.team === 1 ? visualConfig.team1Color : visualConfig.team2Color;
+        if (asset) {
+            // Use preloaded SVG asset
             const strokeColors = visualConfig.strokeColor;
             const strokeColor = strokeColors
                 ? (unit.team === 1 ? strokeColors.team1 : strokeColors.team2)
                 : (unit.team === 1 ? "#2c5282" : "#c53030");
 
-            this.svgRenderer.drawSvg(
+            SyncSvgRenderer.drawPreloadedAsset(
                 ctx,
-                this.svgData,
+                asset,
+                unit,
                 centerX,
                 centerY,
                 config.UNIT_RADIUS * 2, // SVG size
-                unit,
-                baseColor,
                 strokeColor,
                 unit.isSelected
             );
         } else {
-            // Fallback to circle rendering if SVG failed to load
+            // Fallback to circle rendering if asset not available
             this.drawFallbackShape(ctx, unit, centerX, centerY, config, visualConfig);
         }
     }

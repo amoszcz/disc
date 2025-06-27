@@ -12,10 +12,10 @@ const CONFIG: GameConfig = {
 };
 
 // Initialize and start the game when page loads
-window.addEventListener("load", () => {
+window.addEventListener("load", async () => {
   try {
     const game = new Game(CONFIG, "game");
-    const initialized = game.init();
+    const initialized = await game.init();
 
     if (!initialized) {
       console.error("Failed to initialize the game");
