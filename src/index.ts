@@ -22,7 +22,7 @@ const createExampleBattle = (): BattleSetup => {
       att: 30,
       lif: 80,
       maxLif: 80,
-      position: { row: 0, col: 1 } // Top-left corner
+      position: { row: 0, col: 1 }, // Top-left corner
     },
     {
       id: "team1-mage1",
@@ -31,7 +31,7 @@ const createExampleBattle = (): BattleSetup => {
       att: 35,
       lif: 60,
       maxLif: 60,
-      position: { row: 1, col: 1 } // Middle-left
+      position: { row: 1, col: 1 }, // Middle-left
     },
     {
       id: "team1-knight1",
@@ -40,7 +40,7 @@ const createExampleBattle = (): BattleSetup => {
       att: 40,
       lif: 120,
       maxLif: 120,
-      position: { row: 2, col: 1 } // Bottom-left
+      position: { row: 2, col: 1 }, // Bottom-left
     },
   ];
 
@@ -52,7 +52,7 @@ const createExampleBattle = (): BattleSetup => {
       att: 30,
       lif: 80,
       maxLif: 80,
-      position: { row: 0, col: 2 } // Top-right corner
+      position: { row: 0, col: 2 }, // Top-right corner
     },
     {
       id: "team2-priest1",
@@ -61,7 +61,7 @@ const createExampleBattle = (): BattleSetup => {
       att: 20,
       lif: 90,
       maxLif: 90,
-      position: { row: 1, col: 2 } // Middle-right
+      position: { row: 1, col: 2 }, // Middle-right
     },
     {
       id: "team2-knight1",
@@ -70,7 +70,7 @@ const createExampleBattle = (): BattleSetup => {
       att: 40,
       lif: 120,
       maxLif: 120,
-      position: { row: 2, col: 2 } // Bottom-right
+      position: { row: 2, col: 2 }, // Bottom-right
     },
   ];
 
@@ -87,7 +87,7 @@ const createComplexBattle = (): BattleSetup => {
       att: 45,
       lif: 130,
       maxLif: 130,
-      position: { row: 1, col: 1 } // Front line tank
+      position: { row: 1, col: 1 }, // Front line tank
     },
     {
       id: "team1-archer-back",
@@ -96,7 +96,7 @@ const createComplexBattle = (): BattleSetup => {
       att: 35,
       lif: 70,
       maxLif: 70,
-      position: { row: 0, col: 0 } // Back line archer
+      position: { row: 0, col: 0 }, // Back line archer
     },
     {
       id: "team1-mage-back",
@@ -105,7 +105,7 @@ const createComplexBattle = (): BattleSetup => {
       att: 40,
       lif: 55,
       maxLif: 55,
-      position: { row: 2, col: 0 } // Back line mage
+      position: { row: 2, col: 0 }, // Back line mage
     },
   ];
 
@@ -117,7 +117,7 @@ const createComplexBattle = (): BattleSetup => {
       att: 42,
       lif: 125,
       maxLif: 125,
-      position: { row: 1, col: 2 } // Front line tank
+      position: { row: 1, col: 2 }, // Front line tank
     },
     {
       id: "team2-priest-support",
@@ -126,7 +126,7 @@ const createComplexBattle = (): BattleSetup => {
       att: 15,
       lif: 85,
       maxLif: 85,
-      position: { row: 0, col: 3 } // Support healer
+      position: { row: 0, col: 3 }, // Support healer
     },
     {
       id: "team2-archer-back",
@@ -135,7 +135,7 @@ const createComplexBattle = (): BattleSetup => {
       att: 32,
       lif: 75,
       maxLif: 75,
-      position: { row: 2, col: 3 } // Back line archer
+      position: { row: 2, col: 3 }, // Back line archer
     },
   ];
 
@@ -149,13 +149,23 @@ window.addEventListener("load", async () => {
     const battleSetup = createExampleBattle(); // or createComplexBattle()
 
     console.log("Setting up battle with the following formations:");
-    console.log("Team 1:", battleSetup.team1Units.map(u => `${u.type} at (${u.position.row}, ${u.position.col})`));
-    console.log("Team 2:", battleSetup.team2Units.map(u => `${u.type} at (${u.position.row}, ${u.position.col})`));
+    console.log(
+      "Team 1:",
+      battleSetup.team1Units.map(
+        (u) => `${u.type} at (${u.position.row}, ${u.position.col})`,
+      ),
+    );
+    console.log(
+      "Team 2:",
+      battleSetup.team2Units.map(
+        (u) => `${u.type} at (${u.position.row}, ${u.position.col})`,
+      ),
+    );
 
     const battleModule = await BattleModuleFactory.createQuickBattle(
-        "game",
-        battleSetup,
-        CONFIG,
+      "game",
+      battleSetup,
+      CONFIG,
     );
 
     // Setup event listeners
