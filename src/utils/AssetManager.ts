@@ -1,7 +1,6 @@
-﻿
-import type { UnitType } from '../types/GameTypes.js';
-import type { UnitVisualConfig } from '../config/RenderConfig.js';
-import { ConfigLoader } from '../config/ConfigLoader.js';
+﻿import {UnitType} from '../types/GameTypes.js';
+import type {UnitVisualConfig} from '../config/RenderConfig.js';
+import {ConfigLoader} from '../config/ConfigLoader.js';
 
 export interface PreloadedAsset {
     baseImage: HTMLImageElement;
@@ -33,7 +32,8 @@ export class AssetManager {
 
         console.log('Starting asset initialization...');
 
-        const unitTypes: UnitType[] = ['archer', 'mage', 'knight', 'priest'];
+       
+        const unitTypes: UnitType[] = [UnitType.ARCHER,UnitType.MAGE,UnitType.KNIGHT,UnitType.PRIEST];
         const loadPromises = unitTypes.map(unitType => this.loadUnitAsset(unitType));
 
         await Promise.all(loadPromises);
