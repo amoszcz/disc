@@ -1,27 +1,39 @@
-﻿import type { AttackStrategy } from "./AttackStrategy.js";
-import { UnitType } from "../types/GameTypes.js";
+﻿
+import type { AttackStrategy } from "./AttackStrategy.js";
 import { ArcherAttackStrategy } from "./ArcherAttackStrategy.js";
 import { MageAttackStrategy } from "./MageAttackStrategy.js";
+import { KnightAttackStrategy } from "./KnightAttackStrategy.js";
 import { PriestAttackStrategy } from "./PriestAttackStrategy.js";
-import { KnightAttackStrategy } from "./KnightAttackStrategy";
 
 export class AttackStrategyFactory {
-  private static strategies: Map<UnitType, AttackStrategy> = new Map([
-    [UnitType.ARCHER, new ArcherAttackStrategy()],
-    [UnitType.MAGE, new MageAttackStrategy()],
-    [UnitType.PRIEST, new PriestAttackStrategy()],
-    [UnitType.KNIGHT, new KnightAttackStrategy()],
-  ]);
+  private static strategies: Map<string, AttackStrategy> = new Map();
 
-  public static getStrategy(unitType: UnitType): AttackStrategy {
-    const strategy = this.strategies.get(unitType);
+  static {
+    // Initialize strategies with their IDs
+    this.strategies.set("archer", new ArcherAttackStrategy());
+    this.strategies.set("mage", new MageAttackStrategy());
+    this.strategies.set("knight", new KnightAttackStrategy());
+    this.strategies.set("priest", new PriestAttackStrategy());
+  }
+
+  public static getStrategy(strategyId: string): AttackStrategy {
+    const strategy = this.strategies.get(strategyId.toLowerCase());
     if (!strategy) {
-      throw new Error(`No attack strategy found for unit type: ${unitType}`);
+      console.warn(`Attack strategy '${strategyId}' not found, falling back to archer strategy`);
+      return this.strategies.get("archer")!;
     }
     return strategy;
   }
 
-  public static getAllStrategies(): Map<UnitType, AttackStrategy> {
-    return new Map(this.strategies);
+  public static registerStrategy(strategyId: string, strategy: AttackStrategy): void {
+    this.strategies.set(strategyId.toLowerCase(), strategy);
+  }
+
+  public static getAvailableStrategies(): string[] {
+    return Array.from(this.strategies.keys());
+  }
+
+  public static hasStrategy(strategyId: string): boolean {
+    return this.strategies.has(strategyId.toLowerCase());
   }
 }

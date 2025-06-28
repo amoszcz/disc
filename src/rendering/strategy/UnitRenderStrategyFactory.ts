@@ -1,35 +1,38 @@
 ﻿import type { UnitRenderStrategy } from "./UnitRenderStrategy.js";
-import { UnitType } from "../../types/GameTypes.js";
 import { ArcherRenderStrategy } from "./ArcherRenderStrategy.js";
 import { MageRenderStrategy } from "./MageRenderStrategy.js";
+import { KnightRenderStrategy } from "./KnightRenderStrategy.js";
 import { PriestRenderStrategy } from "./PriestRenderStrategy.js";
 
-import { KnightRenderStrategy } from "./KnightRenderStrategy.js";
-
 export class UnitRenderStrategyFactory {
-  private static strategies: Map<UnitType, UnitRenderStrategy> = new Map([
-    [UnitType.ARCHER, new ArcherRenderStrategy()],
-    [UnitType.MAGE, new MageRenderStrategy()],
-    [UnitType.PRIEST, new PriestRenderStrategy()],
-    [UnitType.KNIGHT, new KnightRenderStrategy()],
-  ]);
+  private static strategies: Map<string, UnitRenderStrategy> = new Map();
 
-  public static getStrategy(unitType: UnitType): UnitRenderStrategy {
-    const strategy = this.strategies.get(unitType);
+  static {
+    // Initialize render strategies with their IDs
+    this.strategies.set("archer", new ArcherRenderStrategy());
+    this.strategies.set("mage", new MageRenderStrategy());
+    this.strategies.set("knight", new KnightRenderStrategy());
+    this.strategies.set("priest", new PriestRenderStrategy());
+  }
+
+  public static getStrategy(renderStrategyId: string): UnitRenderStrategy {
+    const strategy = this.strategies.get(renderStrategyId.toLowerCase());
     if (!strategy) {
-      throw new Error(`No render strategy found for unit type: ${unitType}`);
+      console.warn(`Render strategy '${renderStrategyId}' not found, falling back to archer strategy`);
+      return this.strategies.get("archer")!;
     }
     return strategy;
   }
 
-  public static getAllStrategies(): Map<UnitType, UnitRenderStrategy> {
-    return new Map(this.strategies);
+  public static registerStrategy(strategyId: string, strategy: UnitRenderStrategy): void {
+    this.strategies.set(strategyId.toLowerCase(), strategy);
   }
 
-  public static registerStrategy(
-    unitType: UnitType,
-    strategy: UnitRenderStrategy,
-  ): void {
-    this.strategies.set(unitType, strategy);
+  public static getAvailableStrategies(): string[] {
+    return Array.from(this.strategies.keys());
+  }
+
+  public static hasStrategy(strategyId: string): boolean {
+    return this.strategies.has(strategyId.toLowerCase());
   }
 }

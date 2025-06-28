@@ -29,6 +29,8 @@ export interface Unit {
   isSelected: boolean;
   hasActed: boolean;
   type: UnitType;
+  attackStrategyId: string; // Add this field
+  renderStrategyId: string; // Add this field
   receivedDamageFrom: Unit | null;
 }
 

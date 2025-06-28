@@ -65,7 +65,7 @@ export interface BattleModule {
 
 export interface BattleState {
   isActive: boolean;
-  isPaused: false;
+  isPaused: boolean;
   currentTurn: 1 | 2;
   turnNumber: number;
   units: BattleUnit[];

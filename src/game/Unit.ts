@@ -1,11 +1,4 @@
-﻿import type {
-  Unit,
-  GameConfig,
-  AttackResult,
-  UnitType,
-  BoardPosition,
-} from "../types/GameTypes.js";
-import { UnitType as UnitTypeEnum } from "../types/GameTypes.js";
+﻿import {Unit, AttackResult, UnitType, GameConfig, BoardPosition} from "../types/GameTypes.js";
 import { AttackStrategyFactory } from "../strategy/AttackStrategyFactory.js";
 
 export class UnitManager {
@@ -14,22 +7,21 @@ export class UnitManager {
   constructor(config: GameConfig) {
     this.config = config;
   }
-
   public createUnit(
-    team: 1 | 2,
-    row: number,
-    col: number,
-    type?: UnitType,
+      team: 1 | 2,
+      row: number,
+      col: number,
+      type?: UnitType,
   ): Unit {
     // Assign unit types in a pattern if not specified
     let unitType = type;
     if (!unitType) {
       const typeIndex = (row + col) % 4;
       unitType = [
-        UnitTypeEnum.ARCHER,
-        UnitTypeEnum.MAGE,
-        UnitTypeEnum.PRIEST,
-        UnitTypeEnum.KNIGHT,
+        UnitType.ARCHER,
+        UnitType.MAGE,
+        UnitType.PRIEST,
+        UnitType.KNIGHT,
       ][typeIndex];
     }
 
@@ -74,7 +66,7 @@ export class UnitManager {
   public getHealthPercentage(unit: Unit): number {
     return unit.lif / unit.maxLif;
   }
-
+  
   public isUnitAlive(unit: Unit | null): unit is Unit {
     return unit !== null && unit.isAlive;
   }
@@ -97,7 +89,7 @@ export class UnitManager {
     targetCol: number,
     board: (Unit | null)[][],
   ): boolean {
-    const strategy = AttackStrategyFactory.getStrategy(attacker.type);
+    const strategy = AttackStrategyFactory.getStrategy(attacker.attackStrategyId);
     return strategy.canAttack(attacker, targetRow, targetCol, board);
   }
 
@@ -109,7 +101,7 @@ export class UnitManager {
     boardRows: number,
     boardCols: number,
   ): AttackResult {
-    const strategy = AttackStrategyFactory.getStrategy(attacker.type);
+    const strategy = AttackStrategyFactory.getStrategy(attacker.attackStrategyId);
     return strategy.executeAttack(
       attacker,
       targetRow,
@@ -119,22 +111,50 @@ export class UnitManager {
       boardCols,
     );
   }
-
   public resetUnitActivity(unit: Unit): void {
     if (unit.isAlive) {
       unit.hasActed = false;
     }
   }
-
   public isUnitActive(unit: Unit): boolean {
     return unit.isAlive && !unit.hasActed;
   }
 
+  // public damageUnit(target: Unit, damage: number, attacker: Unit): void {
+  //   target.lif -= damage;
+  //   target.receivedDamageFrom = attacker;
+  //
+  //   if (target.lif <= 0) {
+  //     target.lif = 0;
+  //     target.isAlive = false;
+  //     target.isSelected = false;
+  //     target.hasActed = true;
+  //   }
+  // }
+  //
+  // public healUnit(target: Unit, healAmount: number): void {
+  //   if (target.isAlive) {
+  //     target.lif = Math.min(target.maxLif, target.lif + healAmount);
+  //   }
+  // }
+
+  public resetUnitsForTurn(board: (Unit | null)[][], team: 1 | 2): void {
+    for (let row = 0; row < board.length; row++) {
+      for (let col = 0; col < board[row].length; col++) {
+        const unit = board[row][col];
+        if (unit && unit.team === team && unit.isAlive) {
+          unit.hasActed = false;
+          unit.isSelected = false;
+          unit.receivedDamageFrom = null;
+        }
+      }
+    }
+  }
   public getAllActiveUnits(
-    board: (Unit | null)[][],
-    team: 1 | 2,
-    boardRows: number,
-    boardCols: number,
+      board: (Unit | null)[][],
+      team: 1 | 2,
+      boardRows: number,
+      boardCols: number,
   ): Unit[] {
     const activeUnits: Unit[] = [];
 
@@ -149,12 +169,36 @@ export class UnitManager {
 
     return activeUnits;
   }
+  public hasActiveUnits(board: (Unit | null)[][], team: 1 | 2): boolean {
+    for (let row = 0; row < board.length; row++) {
+      for (let col = 0; col < board[row].length; col++) {
+        const unit = board[row][col];
+        if (unit && unit.team === team && unit.isAlive && !unit.hasActed) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  public getAliveUnits(board: (Unit | null)[][], team: 1 | 2): Unit[] {
+    const units: Unit[] = [];
+    for (let row = 0; row < board.length; row++) {
+      for (let col = 0; col < board[row].length; col++) {
+        const unit = board[row][col];
+        if (unit && unit.team === team && unit.isAlive) {
+          units.push(unit);
+        }
+      }
+    }
+    return units;
+  }
 
   public getAvailableTargets(
-    attacker: Unit,
-    board: (Unit | null)[][],
-    boardRows: number,
-    boardCols: number,
+      attacker: Unit,
+      board: (Unit | null)[][],
+      boardRows: number,
+      boardCols: number,
   ): BoardPosition[] {
     const targets: BoardPosition[] = [];
 
@@ -169,18 +213,6 @@ export class UnitManager {
     return targets;
   }
 
-  public getUnitTypeDisplayName(type: UnitType): string {
-    switch (type) {
-      case UnitTypeEnum.ARCHER:
-        return "Archer";
-      case UnitTypeEnum.MAGE:
-        return "Mage";
-      case UnitTypeEnum.PRIEST:
-        return "Priest";
-      case UnitTypeEnum.KNIGHT:
-        return "Knight";
-      default:
-        return "Unknown";
-    }
-  }
+
+ 
 }

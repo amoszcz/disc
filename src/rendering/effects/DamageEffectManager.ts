@@ -14,13 +14,13 @@ export class DamageEffectManager {
 
   public addEffect(
     targetUnit: Unit,
-    attackerType: UnitType,
+    attackType: string,
     centerX: number,
     centerY: number,
   ): void {
     const key = `${targetUnit.row}-${targetUnit.col}`;
     const particles = this.createParticlesForAttackType(
-      attackerType,
+        attackType,
       centerX,
       centerY,
     );
@@ -44,14 +44,14 @@ export class DamageEffectManager {
   }
 
   private createParticlesForAttackType(
-    attackerType: UnitType,
+    attackType: string,
     x: number,
     y: number,
   ): DamageParticle[] {
     const particles: DamageParticle[] = [];
     const startTime = Date.now();
 
-    switch (attackerType) {
+    switch (attackType) {
       case "archer":
         // Arrow impact particles
         for (let i = 0; i < 8; i++) {

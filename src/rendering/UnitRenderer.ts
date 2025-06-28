@@ -16,11 +16,11 @@ export class UnitRenderer {
 
   private addDamageEffect(
     targetUnit: Unit,
-    attackerType: UnitType,
+    attackType: string,
     centerX: number,
     centerY: number,
   ): void {
-    this.effectManager.addEffect(targetUnit, attackerType, centerX, centerY);
+    this.effectManager.addEffect(targetUnit, attackType, centerX, centerY);
   }
 
   public drawUnits(ctx: CanvasRenderingContext2D, gameState: GameState): void {
@@ -38,7 +38,7 @@ export class UnitRenderer {
     // Move existing drawUnits logic here
     for (let row = 0; row < this.config.BOARD_ROWS; row++) {
       for (let col = 0; col < this.config.BOARD_COLS; col++) {
-        const unit = gameState.board[row][col];
+        const unit = gameState.board[row][col]!;
         if (!this.unitManager.isUnitAlive(unit)) continue;
 
         const centerX =
@@ -94,7 +94,7 @@ export class UnitRenderer {
     centerY: number,
     currentTurn: 1 | 2,
   ): void {
-    const strategy = UnitRenderStrategyFactory.getStrategy(unit.type);
+    const strategy = UnitRenderStrategyFactory.getStrategy(unit.renderStrategyId);
 
     // Draw the unit shape using the strategy
     strategy.drawUnitShape(ctx, unit, centerX, centerY, this.config);
@@ -120,7 +120,7 @@ export class UnitRenderer {
     if (unit.receivedDamageFrom) {
       this.addDamageEffect(
         unit,
-        unit.receivedDamageFrom.type,
+        unit.receivedDamageFrom.attackStrategyId,
         centerX,
         centerY,
       );
@@ -211,7 +211,7 @@ export class UnitRenderer {
     centerX: number,
     centerY: number,
   ): void {
-    const strategy = UnitRenderStrategyFactory.getStrategy(unit.type);
+    const strategy = UnitRenderStrategyFactory.getStrategy(unit.renderStrategyId);
     const visualConfig = strategy.getVisualConfig();
 
     ctx.fillStyle = "white";
