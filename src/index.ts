@@ -21,7 +21,7 @@ const createExampleBattle = (): BattleSetup => {
       "archer",
       1,
       { row: 0, col: 0 },
-      0.8 // 80% health
+      0.8, // 80% health
     ),
     UnitFactory.createNewBattleUnit(
       "team1-mage1",
@@ -29,14 +29,14 @@ const createExampleBattle = (): BattleSetup => {
       1,
       { row: 1, col: 0 },
       1.0, // Full health
-      { attMultiplier: 1.2 } // 20% attack bonus
+      { attMultiplier: 1.2 }, // 20% attack bonus
     ),
     UnitFactory.createNewBattleUnit(
       "team1-knight1",
       "knight",
       1,
       { row: 2, col: 0 },
-      0.9 // 90% health
+      0.9, // 90% health
     ),
   ];
 
@@ -46,7 +46,7 @@ const createExampleBattle = (): BattleSetup => {
       "archer",
       2,
       { row: 0, col: 3 },
-      1.0 // Full health
+      1.0, // Full health
     ),
     UnitFactory.createNewBattleUnit(
       "team2-priest1",
@@ -54,14 +54,14 @@ const createExampleBattle = (): BattleSetup => {
       2,
       { row: 1, col: 3 },
       0.7, // 70% health
-      { lifMultiplier: 1.1 } // 10% life bonus
+      { lifMultiplier: 1.1 }, // 10% life bonus
     ),
     UnitFactory.createNewBattleUnit(
       "team2-knight1",
       "knight",
       2,
       { row: 2, col: 3 },
-      0.95 // 95% health
+      0.95, // 95% health
     ),
   ];
 
@@ -77,10 +77,10 @@ const createWoundedBattle = (): BattleSetup => {
       1,
       { row: 1, col: 1 },
       0.6, // Wounded veteran
-      { 
+      {
         attMultiplier: 1.3, // +30% attack from experience
-        lifMultiplier: 1.1  // +10% max life
-      }
+        lifMultiplier: 1.1, // +10% max life
+      },
     ),
     UnitFactory.createNewBattleUnit(
       "team1-weakened-mage",
@@ -88,7 +88,7 @@ const createWoundedBattle = (): BattleSetup => {
       1,
       { row: 0, col: 0 },
       0.3, // Badly wounded
-      { attMultiplier: 0.8 } // -20% attack due to weakness
+      { attMultiplier: 0.8 }, // -20% attack due to weakness
     ),
   ];
 
@@ -98,7 +98,7 @@ const createWoundedBattle = (): BattleSetup => {
       "archer",
       2,
       { row: 0, col: 3 },
-      1.0 // Fresh unit at full strength
+      1.0, // Fresh unit at full strength
     ),
     UnitFactory.createNewBattleUnit(
       "team2-blessed-priest",
@@ -106,10 +106,10 @@ const createWoundedBattle = (): BattleSetup => {
       2,
       { row: 1, col: 2 },
       1.0,
-      { 
+      {
         attMultiplier: 1.1, // +10% healing power
-        lifMultiplier: 1.2  // +20% max life from blessing
-      }
+        lifMultiplier: 1.2, // +20% max life from blessing
+      },
     ),
   ];
 
@@ -119,31 +119,35 @@ const createWoundedBattle = (): BattleSetup => {
 // Helper function to log battle setup details
 const logBattleSetup = (battleSetup: BattleSetup): void => {
   console.log("=== Battle Setup Details ===");
-  
+
   const logTeam = (teamUnits: BattleUnit[], teamName: string) => {
     console.log(`\n${teamName}:`);
-    teamUnits.forEach(unit => {
+    teamUnits.forEach((unit) => {
       const config = UnitFactory.getUnitConfig(unit.unitTypeId);
       const baseLife = config?.baseStats.lif || 0;
       const lifMultiplier = unit.statModifiers?.lifMultiplier || 1;
       const maxLife = Math.round(baseLife * lifMultiplier);
       const currentLife = Math.round(maxLife * unit.lifePercentage);
-      
+
       console.log(
         `  ${unit.id}: ${config?.name || unit.unitTypeId} ` +
-        `at (${unit.position.row}, ${unit.position.col}) - ` +
-        `${currentLife}/${maxLife} HP (${Math.round(unit.lifePercentage * 100)}%)`
+          `at (${unit.position.row}, ${unit.position.col}) - ` +
+          `${currentLife}/${maxLife} HP (${Math.round(unit.lifePercentage * 100)}%)`,
       );
-      
+
       if (unit.statModifiers?.attMultiplier) {
-        console.log(`    Attack modifier: ${Math.round((unit.statModifiers.attMultiplier - 1) * 100)}%`);
+        console.log(
+          `    Attack modifier: ${Math.round((unit.statModifiers.attMultiplier - 1) * 100)}%`,
+        );
       }
       if (unit.statModifiers?.lifMultiplier) {
-        console.log(`    Life modifier: ${Math.round((unit.statModifiers.lifMultiplier - 1) * 100)}%`);
+        console.log(
+          `    Life modifier: ${Math.round((unit.statModifiers.lifMultiplier - 1) * 100)}%`,
+        );
       }
     });
   };
-  
+
   logTeam(battleSetup.team1Units, "Team 1");
   logTeam(battleSetup.team2Units, "Team 2");
   console.log("\n" + "=".repeat(30));
@@ -154,9 +158,9 @@ window.addEventListener("load", async () => {
   try {
     // Use either the example or wounded battle setup
     const battleSetup = createExampleBattle(); // or createWoundedBattle()
-    
+
     logBattleSetup(battleSetup);
-    
+
     const battleModule = await BattleModuleFactory.createQuickBattle(
       "game",
       battleSetup,

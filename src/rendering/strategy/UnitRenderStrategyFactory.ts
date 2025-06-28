@@ -18,13 +18,18 @@ export class UnitRenderStrategyFactory {
   public static getStrategy(renderStrategyId: string): UnitRenderStrategy {
     const strategy = this.strategies.get(renderStrategyId.toLowerCase());
     if (!strategy) {
-      console.warn(`Render strategy '${renderStrategyId}' not found, falling back to archer strategy`);
+      console.warn(
+        `Render strategy '${renderStrategyId}' not found, falling back to archer strategy`,
+      );
       return this.strategies.get("archer")!;
     }
     return strategy;
   }
 
-  public static registerStrategy(strategyId: string, strategy: UnitRenderStrategy): void {
+  public static registerStrategy(
+    strategyId: string,
+    strategy: UnitRenderStrategy,
+  ): void {
     this.strategies.set(strategyId.toLowerCase(), strategy);
   }
 

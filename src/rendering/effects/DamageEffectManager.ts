@@ -20,7 +20,7 @@ export class DamageEffectManager {
   ): void {
     const key = `${targetUnit.row}-${targetUnit.col}`;
     const particles = this.createParticlesForAttackType(
-        attackType,
+      attackType,
       centerX,
       centerY,
     );

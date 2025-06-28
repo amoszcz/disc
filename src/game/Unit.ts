@@ -1,4 +1,10 @@
-﻿import {Unit, AttackResult, UnitType, GameConfig, BoardPosition} from "../types/GameTypes.js";
+﻿import {
+  Unit,
+  AttackResult,
+  UnitType,
+  GameConfig,
+  BoardPosition,
+} from "../types/GameTypes.js";
 import { AttackStrategyFactory } from "../strategy/AttackStrategyFactory.js";
 
 export class UnitManager {
@@ -8,10 +14,10 @@ export class UnitManager {
     this.config = config;
   }
   public createUnit(
-      team: 1 | 2,
-      row: number,
-      col: number,
-      type?: UnitType,
+    team: 1 | 2,
+    row: number,
+    col: number,
+    type?: UnitType,
   ): Unit {
     // Assign unit types in a pattern if not specified
     let unitType = type;
@@ -66,7 +72,7 @@ export class UnitManager {
   public getHealthPercentage(unit: Unit): number {
     return unit.lif / unit.maxLif;
   }
-  
+
   public isUnitAlive(unit: Unit | null): unit is Unit {
     return unit !== null && unit.isAlive;
   }
@@ -89,7 +95,9 @@ export class UnitManager {
     targetCol: number,
     board: (Unit | null)[][],
   ): boolean {
-    const strategy = AttackStrategyFactory.getStrategy(attacker.attackStrategyId);
+    const strategy = AttackStrategyFactory.getStrategy(
+      attacker.attackStrategyId,
+    );
     return strategy.canAttack(attacker, targetRow, targetCol, board);
   }
 
@@ -101,7 +109,9 @@ export class UnitManager {
     boardRows: number,
     boardCols: number,
   ): AttackResult {
-    const strategy = AttackStrategyFactory.getStrategy(attacker.attackStrategyId);
+    const strategy = AttackStrategyFactory.getStrategy(
+      attacker.attackStrategyId,
+    );
     return strategy.executeAttack(
       attacker,
       targetRow,
@@ -151,10 +161,10 @@ export class UnitManager {
     }
   }
   public getAllActiveUnits(
-      board: (Unit | null)[][],
-      team: 1 | 2,
-      boardRows: number,
-      boardCols: number,
+    board: (Unit | null)[][],
+    team: 1 | 2,
+    boardRows: number,
+    boardCols: number,
   ): Unit[] {
     const activeUnits: Unit[] = [];
 
@@ -195,10 +205,10 @@ export class UnitManager {
   }
 
   public getAvailableTargets(
-      attacker: Unit,
-      board: (Unit | null)[][],
-      boardRows: number,
-      boardCols: number,
+    attacker: Unit,
+    board: (Unit | null)[][],
+    boardRows: number,
+    boardCols: number,
   ): BoardPosition[] {
     const targets: BoardPosition[] = [];
 
@@ -212,7 +222,4 @@ export class UnitManager {
 
     return targets;
   }
-
-
- 
 }

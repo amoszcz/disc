@@ -70,12 +70,12 @@ export class ConfigLoader {
     try {
       const [renderResponse, unitResponse] = await Promise.all([
         fetch("/src/config/unit-render-config.json"),
-        fetch("/src/config/unit-config.json")
+        fetch("/src/config/unit-config.json"),
       ]);
-      
+
       this.renderConfig = await renderResponse.json();
       this.unitConfigs = await unitResponse.json();
-      
+
       // Preload new SVGs
       await this.preloadAllSvgs();
     } catch (error) {

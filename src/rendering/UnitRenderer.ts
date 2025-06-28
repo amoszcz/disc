@@ -94,7 +94,9 @@ export class UnitRenderer {
     centerY: number,
     currentTurn: 1 | 2,
   ): void {
-    const strategy = UnitRenderStrategyFactory.getStrategy(unit.renderStrategyId);
+    const strategy = UnitRenderStrategyFactory.getStrategy(
+      unit.renderStrategyId,
+    );
 
     // Draw the unit shape using the strategy
     strategy.drawUnitShape(ctx, unit, centerX, centerY, this.config);
@@ -211,7 +213,9 @@ export class UnitRenderer {
     centerX: number,
     centerY: number,
   ): void {
-    const strategy = UnitRenderStrategyFactory.getStrategy(unit.renderStrategyId);
+    const strategy = UnitRenderStrategyFactory.getStrategy(
+      unit.renderStrategyId,
+    );
     const visualConfig = strategy.getVisualConfig();
 
     ctx.fillStyle = "white";

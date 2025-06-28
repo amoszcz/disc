@@ -1,7 +1,7 @@
-﻿import type { Unit, UnitType } from '../types/GameTypes.js';
-import type { BattleUnit } from '../types/BattleTypes.js';
-import type { UnitConfig } from '../types/UnitConfig.js';
-import { ConfigLoader } from '../config/ConfigLoader.js';
+﻿import type { Unit, UnitType } from "../types/GameTypes.js";
+import type { BattleUnit } from "../types/BattleTypes.js";
+import type { UnitConfig } from "../types/UnitConfig.js";
+import { ConfigLoader } from "../config/ConfigLoader.js";
 
 export class UnitFactory {
   private static configLoader = ConfigLoader.getInstance();
@@ -11,18 +11,20 @@ export class UnitFactory {
    */
   public static createUnitFromBattleUnit(battleUnit: BattleUnit): Unit {
     const unitConfig = this.configLoader.getUnitConfig(battleUnit.unitTypeId);
-    
+
     if (!unitConfig) {
-      throw new Error(`Unit configuration not found for type: ${battleUnit.unitTypeId}`);
+      throw new Error(
+        `Unit configuration not found for type: ${battleUnit.unitTypeId}`,
+      );
     }
 
     // Calculate actual stats from base stats and modifiers
     const baseAtt = unitConfig.baseStats.att;
     const baseLif = unitConfig.baseStats.lif;
-    
+
     const attMultiplier = battleUnit.statModifiers?.attMultiplier || 1.0;
     const lifMultiplier = battleUnit.statModifiers?.lifMultiplier || 1.0;
-    
+
     const finalMaxLif = Math.round(baseLif * lifMultiplier);
     const finalAtt = Math.round(baseAtt * attMultiplier);
     const currentLif = Math.round(finalMaxLif * battleUnit.lifePercentage);
@@ -40,7 +42,7 @@ export class UnitFactory {
       type: battleUnit.unitTypeId as UnitType,
       attackStrategyId: unitConfig.attackStrategyId, // Set from config
       renderStrategyId: unitConfig.renderStrategyId, // Set from config
-      receivedDamageFrom: null
+      receivedDamageFrom: null,
     };
   }
 
@@ -49,7 +51,7 @@ export class UnitFactory {
    */
   public static createBattleUnitFromUnit(unit: Unit, id: string): BattleUnit {
     const lifePercentage = unit.maxLif > 0 ? unit.lif / unit.maxLif : 0;
-    
+
     return {
       id,
       unitTypeId: unit.type,
@@ -57,8 +59,8 @@ export class UnitFactory {
       lifePercentage,
       position: {
         row: unit.row,
-        col: unit.col
-      }
+        col: unit.col,
+      },
     };
   }
 
@@ -71,10 +73,10 @@ export class UnitFactory {
     team: 1 | 2,
     position: { row: number; col: number },
     lifePercentage: number = 1.0,
-    statModifiers?: { attMultiplier?: number; lifMultiplier?: number }
+    statModifiers?: { attMultiplier?: number; lifMultiplier?: number },
   ): BattleUnit {
     const unitConfig = this.configLoader.getUnitConfig(unitTypeId);
-    
+
     if (!unitConfig) {
       throw new Error(`Unit configuration not found for type: ${unitTypeId}`);
     }
@@ -85,7 +87,7 @@ export class UnitFactory {
       team,
       lifePercentage: Math.max(0, Math.min(1, lifePercentage)), // Clamp between 0 and 1
       position,
-      statModifiers
+      statModifiers,
     };
   }
 

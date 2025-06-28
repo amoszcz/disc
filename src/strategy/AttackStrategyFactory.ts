@@ -1,5 +1,4 @@
-﻿
-import type { AttackStrategy } from "./AttackStrategy.js";
+﻿import type { AttackStrategy } from "./AttackStrategy.js";
 import { ArcherAttackStrategy } from "./ArcherAttackStrategy.js";
 import { MageAttackStrategy } from "./MageAttackStrategy.js";
 import { KnightAttackStrategy } from "./KnightAttackStrategy.js";
@@ -19,13 +18,18 @@ export class AttackStrategyFactory {
   public static getStrategy(strategyId: string): AttackStrategy {
     const strategy = this.strategies.get(strategyId.toLowerCase());
     if (!strategy) {
-      console.warn(`Attack strategy '${strategyId}' not found, falling back to archer strategy`);
+      console.warn(
+        `Attack strategy '${strategyId}' not found, falling back to archer strategy`,
+      );
       return this.strategies.get("archer")!;
     }
     return strategy;
   }
 
-  public static registerStrategy(strategyId: string, strategy: AttackStrategy): void {
+  public static registerStrategy(
+    strategyId: string,
+    strategy: AttackStrategy,
+  ): void {
     this.strategies.set(strategyId.toLowerCase(), strategy);
   }
 
