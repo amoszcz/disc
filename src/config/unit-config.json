@@ -1,0 +1,50 @@
+﻿{
+  "archer": {
+    "unitTypeId": "archer",
+    "name": "Archer",
+    "baseStats": {
+      "att": 30,
+      "lif": 80
+    },
+    "attackStrategyId": "archer",
+    "renderStrategyId": "archer",
+    "description": "Ranged unit with high accuracy and moderate damage",
+    "rarity": "common"
+  },
+  "mage": {
+    "unitTypeId": "mage",
+    "name": "Mage",
+    "baseStats": {
+      "att": 40,
+      "lif": 60
+    },
+    "attackStrategyId": "mage",
+    "renderStrategyId": "mage",
+    "description": "Powerful spellcaster with area effect abilities",
+    "rarity": "rare"
+  },
+  "knight": {
+    "unitTypeId": "knight",
+    "name": "Knight",
+    "baseStats": {
+      "att": 35,
+      "lif": 120
+    },
+    "attackStrategyId": "knight",
+    "renderStrategyId": "knight",
+    "description": "Heavy armored warrior with high health and melee attacks",
+    "rarity": "common"
+  },
+  "priest": {
+    "unitTypeId": "priest",
+    "name": "Priest",
+    "baseStats": {
+      "att": 20,
+      "lif": 90
+    },
+    "attackStrategyId": "priest",
+    "renderStrategyId": "priest",
+    "description": "Support unit capable of healing allies",
+    "rarity": "rare"
+  }
+}

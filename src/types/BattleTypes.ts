@@ -1,15 +1,18 @@
-﻿import type { Unit, UnitType, GameConfig } from "./GameTypes.js";
+﻿import type { UnitType, GameConfig } from './GameTypes.js';
 
 export interface BattleUnit {
   id: string;
-  type: UnitType;
+  unitTypeId: string; // Changed from 'type' to reference unit config
   team: 1 | 2;
-  att: number;
-  lif: number;
-  maxLif: number;
+  lifePercentage: number; // 0.0 to 1.0 (100%)
   position: {
     row: number;
     col: number;
+  };
+  // Optional stat modifiers (multipliers)
+  statModifiers?: {
+    attMultiplier?: number;
+    lifMultiplier?: number;
   };
 }
 
@@ -20,7 +23,7 @@ export interface BattleSetup {
 }
 
 export interface BattleResult {
-  winner: 1 | 2 | "draw";
+  winner: 1 | 2 | 'draw';
   battleEnded: boolean;
   survivingUnits: {
     team1: BattleUnit[];
@@ -40,13 +43,7 @@ export interface BattleResult {
 
 export interface BattleEvent {
   turn: number;
-  type:
-    | "attack"
-    | "heal"
-    | "death"
-    | "turn_start"
-    | "battle_start"
-    | "battle_end";
+  type: 'attack' | 'heal' | 'death' | 'turn_start' | 'battle_start' | 'battle_end';
   actorId: string;
   targetIds?: string[];
   damage?: number;
@@ -68,14 +65,9 @@ export interface BattleModule {
 
 export interface BattleState {
   isActive: boolean;
-  isPaused: boolean;
+  isPaused: false;
   currentTurn: 1 | 2;
   turnNumber: number;
   units: BattleUnit[];
   events: BattleEvent[];
-}
-
-export interface TeamCount {
-  team1: number;
-  team2: number;
 }
