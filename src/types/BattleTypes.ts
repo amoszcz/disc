@@ -1,4 +1,4 @@
-﻿import type { UnitType, GameConfig } from "./GameTypes.js";
+﻿import type { Unit, UnitType, GameConfig } from './GameTypes.js';
 
 export interface BattleUnit {
   id: string;
@@ -7,7 +7,7 @@ export interface BattleUnit {
   att: number;
   lif: number;
   maxLif: number;
-  position?: {
+  position: {
     row: number;
     col: number;
   };
@@ -20,7 +20,7 @@ export interface BattleSetup {
 }
 
 export interface BattleResult {
-  winner: 1 | 2 | "draw";
+  winner: 1 | 2 | 'draw';
   battleEnded: boolean;
   survivingUnits: {
     team1: BattleUnit[];
@@ -40,13 +40,7 @@ export interface BattleResult {
 
 export interface BattleEvent {
   turn: number;
-  type:
-    | "attack"
-    | "heal"
-    | "death"
-    | "turn_start"
-    | "battle_start"
-    | "battle_end";
+  type: 'attack' | 'heal' | 'death' | 'turn_start' | 'battle_start' | 'battle_end';
   actorId: string;
   targetIds?: string[];
   damage?: number;
