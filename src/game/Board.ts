@@ -1,9 +1,10 @@
-﻿import type { Unit, GameConfig, TeamCount } from "../types/GameTypes.js";
+﻿import type { Unit, GameConfig } from "../types/GameTypes.js";
 import { UnitManager } from "./Unit.js";
+import { TeamCount } from "../types/BattleTypes";
 
 export class BoardManager {
   private config: GameConfig;
-  private unitManager: UnitManager;
+  private readonly unitManager: UnitManager;
 
   constructor(config: GameConfig) {
     this.config = config;
@@ -16,7 +17,7 @@ export class BoardManager {
     for (let row = 0; row < this.config.BOARD_ROWS; row++) {
       board[row] = [];
       for (let col = 0; col < this.config.BOARD_COLS; col++) {
-        // Left side (columns 0-1) is team 1, right side (columns 2-3) is team 2
+        // the Left side (columns 0-1) is team 1, the right side (columns 2-3) is team 2
         if (col < 2) {
           board[row][col] = this.unitManager.createUnit(1, row, col);
         } else {

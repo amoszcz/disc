@@ -30,10 +30,6 @@ export class GameLoop {
     requestAnimationFrame((timestamp) => this.loop(timestamp));
   }
 
-  public stop(): void {
-    this.isRunning = false;
-  }
-
   private loop(timestamp: number): void {
     if (
       !this.isRunning ||
@@ -43,8 +39,6 @@ export class GameLoop {
       return;
     }
 
-    // Calculate delta time
-    const deltaTime = (timestamp - this.lastTime) / 1000;
     this.lastTime = timestamp;
 
     // Clear canvas

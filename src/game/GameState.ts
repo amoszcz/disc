@@ -167,17 +167,6 @@ export class GameStateManager {
     return this.boardManager.countAliveUnits(this.gameState.board);
   }
 
-  public canEndTurn(): boolean {
-    const unitManager = this.boardManager.getUnitManager();
-    const activeUnits = unitManager.getAllActiveUnits(
-      this.gameState.board,
-      this.gameState.currentTurn,
-      this.config.BOARD_ROWS,
-      this.config.BOARD_COLS,
-    );
-    return activeUnits.length === 0;
-  }
-
   public deselectAllUnits(): void {
     const unitManager = this.boardManager.getUnitManager();
 
@@ -244,10 +233,6 @@ export class GameStateManager {
     }
   }
 
-  public endGame(): void {
-    this.gameState.gameStatus = GameStatus.GAME_OVER;
-  }
-
   public returnToMenu(): void {
     this.gameState.gameStatus = GameStatus.MENU;
     this.deselectAllUnits();
@@ -266,7 +251,7 @@ export class GameStateManager {
       for (let col = 0; col < this.config.BOARD_COLS; col++) {
         const unit = this.gameState.board[row][col];
         if (unit && unit.team === this.gameState.currentTurn) {
-          // Check if unit has any valid targets
+          // Check if the unit has any valid targets
           const availableTargets = unitManager.getAvailableTargets(
             unit,
             this.gameState.board,
@@ -274,7 +259,7 @@ export class GameStateManager {
             this.config.BOARD_COLS,
           );
 
-          // If no valid targets, mark unit as inactive
+          // If no valid targets, mark the unit as inactive
           if (availableTargets.length === 0) {
             unit.hasActed = true;
           }

@@ -1,22 +1,24 @@
-﻿import type { Unit, GameConfig } from '../../types/GameTypes.js';
-import { BaseRenderStrategy } from './BaseRenderStrategy.js';
+﻿import type { Unit, GameConfig } from "../../types/GameTypes.js";
+import { BaseRenderStrategy } from "./BaseRenderStrategy.js";
 
 export class ArcherRenderStrategy extends BaseRenderStrategy {
   constructor() {
-    super('archer');
+    super("archer");
   }
 
   public drawSpecialEffects(
-      ctx: CanvasRenderingContext2D,
-      unit: Unit,
-      centerX: number,
-      centerY: number,
-      config: GameConfig,
+    ctx: CanvasRenderingContext2D,
+    unit: Unit,
+    centerX: number,
+    centerY: number,
+    config: GameConfig,
   ): void {
     // Draw crosshair for archer precision
     if (unit.isSelected) {
       const visualConfig = this.getVisualConfig();
-      const crosshairColor = visualConfig.specialEffects?.crosshairColor || "rgba(255, 255, 255, 0.8)";
+      const crosshairColor =
+        visualConfig.specialEffects?.crosshairColor ||
+        "rgba(255, 255, 255, 0.8)";
 
       ctx.strokeStyle = crosshairColor;
       ctx.lineWidth = 2;

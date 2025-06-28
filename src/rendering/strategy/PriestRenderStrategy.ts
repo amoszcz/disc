@@ -1,23 +1,24 @@
-﻿import type { Unit, GameConfig } from '../../types/GameTypes.js';
-import { BaseRenderStrategy } from './BaseRenderStrategy.js';
+﻿import type { Unit, GameConfig } from "../../types/GameTypes.js";
+import { BaseRenderStrategy } from "./BaseRenderStrategy.js";
 
 export class PriestRenderStrategy extends BaseRenderStrategy {
   constructor() {
-    super('priest');
+    super("priest");
   }
 
   public drawSpecialEffects(
-      ctx: CanvasRenderingContext2D,
-      unit: Unit,
-      centerX: number,
-      centerY: number,
-      config: GameConfig,
+    ctx: CanvasRenderingContext2D,
+    unit: Unit,
+    centerX: number,
+    centerY: number,
+    config: GameConfig,
   ): void {
     const visualConfig = this.getVisualConfig();
 
     // Draw healing aura
     if (unit.isSelected || !unit.hasActed) {
-      const auraColor = visualConfig.specialEffects?.auraColor || "rgba(34, 197, 94, 0.4)";
+      const auraColor =
+        visualConfig.specialEffects?.auraColor || "rgba(34, 197, 94, 0.4)";
 
       ctx.beginPath();
       ctx.arc(centerX, centerY, config.UNIT_RADIUS * 1.4, 0, 2 * Math.PI);
@@ -32,11 +33,11 @@ export class PriestRenderStrategy extends BaseRenderStrategy {
   }
 
   private drawHolyParticles(
-      ctx: CanvasRenderingContext2D,
-      centerX: number,
-      centerY: number,
-      config: GameConfig,
-      visualConfig: any,
+    ctx: CanvasRenderingContext2D,
+    centerX: number,
+    centerY: number,
+    config: GameConfig,
+    visualConfig: any,
   ): void {
     const particleCount = visualConfig.specialEffects?.particleCount || 8;
     const time = Date.now() * 0.003;

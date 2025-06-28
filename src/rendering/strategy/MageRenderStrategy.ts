@@ -1,24 +1,24 @@
-﻿
-import type { Unit, GameConfig } from '../../types/GameTypes.js';
-import { BaseRenderStrategy } from './BaseRenderStrategy.js';
+﻿import type { Unit, GameConfig } from "../../types/GameTypes.js";
+import { BaseRenderStrategy } from "./BaseRenderStrategy.js";
 
 export class MageRenderStrategy extends BaseRenderStrategy {
   constructor() {
-    super('mage');
+    super("mage");
   }
 
   public drawSpecialEffects(
-      ctx: CanvasRenderingContext2D,
-      unit: Unit,
-      centerX: number,
-      centerY: number,
-      config: GameConfig,
+    ctx: CanvasRenderingContext2D,
+    unit: Unit,
+    centerX: number,
+    centerY: number,
+    config: GameConfig,
   ): void {
     const visualConfig = this.getVisualConfig();
 
     // Draw magical aura
     if (unit.isSelected || !unit.hasActed) {
-      const auraColor = visualConfig.specialEffects?.auraColor || "rgba(128, 90, 213, 0.3)";
+      const auraColor =
+        visualConfig.specialEffects?.auraColor || "rgba(128, 90, 213, 0.3)";
       const glowIntensity = visualConfig.specialEffects?.glowIntensity || 0.8;
 
       ctx.beginPath();
@@ -36,10 +36,10 @@ export class MageRenderStrategy extends BaseRenderStrategy {
   }
 
   private drawSpellParticles(
-      ctx: CanvasRenderingContext2D,
-      centerX: number,
-      centerY: number,
-      config: GameConfig,
+    ctx: CanvasRenderingContext2D,
+    centerX: number,
+    centerY: number,
+    config: GameConfig,
   ): void {
     const time = Date.now() * 0.005;
     const particleCount = 6;

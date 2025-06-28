@@ -1,4 +1,4 @@
-﻿import {Unit, GameState, GameConfig, UnitType} from "../types/GameTypes.js";
+﻿import { Unit, GameState, GameConfig, UnitType } from "../types/GameTypes.js";
 import { UnitManager } from "../game/Unit.js";
 import { UnitRenderStrategyFactory } from "./strategy/UnitRenderStrategyFactory.js";
 import { DamageEffectManager } from "./effects/DamageEffectManager.js";
@@ -95,7 +95,7 @@ export class UnitRenderer {
     currentTurn: 1 | 2,
   ): void {
     const strategy = UnitRenderStrategyFactory.getStrategy(unit.type);
- 
+
     // Draw the unit shape using the strategy
     strategy.drawUnitShape(ctx, unit, centerX, centerY, this.config);
 
@@ -176,10 +176,10 @@ export class UnitRenderer {
   }
 
   private drawUnitStats(
-      ctx: CanvasRenderingContext2D,
-      unit: Unit,
-      centerX: number,
-      centerY: number,
+    ctx: CanvasRenderingContext2D,
+    unit: Unit,
+    centerX: number,
+    centerY: number,
   ): void {
     ctx.fillStyle = "white";
     ctx.font = "bold 9px Arial";
