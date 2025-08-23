@@ -1,6 +1,7 @@
 ﻿import type { Unit, GameConfig } from "../types/GameTypes.js";
 import { UnitManager } from "./Unit.js";
 import { TeamCount } from "../types/BattleTypes";
+import { DefaultAttackStrategyResolver } from "../strategy/AttackStrategyFactory";
 
 export class BoardManager {
   private config: GameConfig;
@@ -8,7 +9,10 @@ export class BoardManager {
 
   constructor(config: GameConfig) {
     this.config = config;
-    this.unitManager = new UnitManager(config);
+    this.unitManager = new UnitManager(
+      config,
+      new DefaultAttackStrategyResolver(),
+    );
   }
 
   public initializeBoard(): (Unit | null)[][] {

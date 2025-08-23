@@ -9,9 +9,10 @@
 import type { GameConfig, Unit } from "../types/GameTypes.js";
 import { Game } from "../core/Game.js";
 import { UnitFactory } from "../utils/UnitFactory.js";
+import type { IGame } from "../types/Ports.js";
 
 export class BattleManager implements BattleModule {
-  private game: Game | null = null;
+  private game: IGame | null = null;
   private canvas: HTMLCanvasElement | null = null;
   private battleState: BattleState;
   private config: GameConfig;
@@ -21,7 +22,7 @@ export class BattleManager implements BattleModule {
   public onBattleEvent?: (event: BattleEvent) => void;
   public onBattleEnd?: (result: BattleResult) => void;
 
-  constructor(canvasId: string, config: Partial<GameConfig>, game:Game) {
+  constructor(canvasId: string, config: Partial<GameConfig>, game:IGame) {
     // Default battle configuration
 
     this.config = {

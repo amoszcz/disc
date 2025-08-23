@@ -1,6 +1,7 @@
 ﻿import type { GameState, GameConfig } from "../types/GameTypes.js";
 import { GameStatus } from "../types/GameTypes.js";
 import { ButtonManager } from "../utils/ButtonManager.js";
+import { appEventBus } from "../utils/EventBus.js";
 
 export class UIRenderer {
   private config: GameConfig;
@@ -198,9 +199,8 @@ export class UIRenderer {
   }
 
   private onStartGame(): void {
-    // This will be handled by the main game class
-    const startGameEvent = new CustomEvent("startGame");
-    window.dispatchEvent(startGameEvent);
+    // Emit start via the app event bus (decoupled from window)
+    appEventBus.emit("startGame", undefined as any);
   }
 
   public getButtonManager(): ButtonManager {

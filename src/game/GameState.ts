@@ -7,12 +7,14 @@
 } from "../types/GameTypes.js";
 import { BoardManager } from "./Board.js";
 type GameStatusChangeHandler = (gameStatus: GameStatus) => void;
+import { DefaultScheduler, type Scheduler } from "../utils/Scheduler.js";
 export class GameStateManager {
   private config: GameConfig;
   private readonly boardManager: BoardManager;
   public gameState: GameState;
   private _gameStatus: GameStatus = GameStatus.MENU;
   private gameStatusChangeHandlers = new Array<GameStatusChangeHandler>();
+  private scheduler: Scheduler;
 
   get gameStatus() {
     return this._gameStatus;
@@ -21,9 +23,10 @@ export class GameStateManager {
     this._gameStatus = gameStatus;
     this.gameStatusChangeHandlers.forEach((handler) => handler(gameStatus));
   }
-  constructor(config: GameConfig) {
+  constructor(config: GameConfig, scheduler: Scheduler = new DefaultScheduler()) {
     this.config = config;
     this.boardManager = new BoardManager(config);
+    this.scheduler = scheduler;
 
     this.gameState = {
       board: this.boardManager.initializeBoard(),
@@ -163,9 +166,9 @@ export class GameStateManager {
     );
 
     if (activeUnits.length === 0) {
-      setTimeout(() => {
+      this.scheduler.delay(1000, () => {
         this.switchTurn();
-      }, 1000);
+      });
     }
   }
 

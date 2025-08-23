@@ -258,18 +258,20 @@ window.addEventListener("load", () => {
     };
   };
 
-  // Listen to the in-canvas menu "startGame" event
-  window.addEventListener("startGame", async () => {
-    try {
-      if (!activeBattle) {
-        await createAndSetupBattle();
+  // Listen to start via app event bus (decoupled from window)
+  import("./utils/EventBus.js").then(({ appEventBus }) => {
+    appEventBus.on("startGame", async () => {
+      try {
+        if (!activeBattle) {
+          await createAndSetupBattle();
+        }
+        if (activeBattle) {
+          const finalResult = await activeBattle.startBattle();
+          console.log("Final battle result:", finalResult);
+        }
+      } catch (error) {
+        console.error("Error starting the battle:", error);
       }
-      if (activeBattle) {
-        const finalResult = await activeBattle.startBattle();
-        console.log("Final battle result:", finalResult);
-      }
-    } catch (error) {
-      console.error("Error starting the battle:", error);
-    }
+    });
   });
 });

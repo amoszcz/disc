@@ -77,3 +77,7 @@ export interface BattleState {
   units: BattleUnit[];
   events: BattleEvent[];
 }
+export interface TeamCount {
+  team1: number;
+  team2: number;
+}

@@ -5,12 +5,15 @@
   GameConfig,
   BoardPosition,
 } from "../types/GameTypes.js";
-import { AttackStrategyFactory } from "../strategy/AttackStrategyFactory.js";
+import { AttackStrategyResolver } from "../strategy/AttackStrategy";
 
 export class UnitManager {
   private config: GameConfig;
 
-  constructor(config: GameConfig) {
+  constructor(
+    config: GameConfig,
+    private resolve: AttackStrategyResolver,
+  ) {
     this.config = config;
   }
   public createUnit(
@@ -43,6 +46,8 @@ export class UnitManager {
       hasActed: false,
       receivedDamageFrom: null,
       type: unitType,
+      attackStrategyId: "",
+      renderStrategyId: "",
     };
   }
   public damageUnit(unit: Unit, damage: number, attacker: Unit): void {
@@ -95,8 +100,8 @@ export class UnitManager {
     targetCol: number,
     board: (Unit | null)[][],
   ): boolean {
-      if (!attacker.attackStrategyId) return false;
-    const strategy = AttackStrategyFactory.getStrategy(
+    if (!attacker.attackStrategyId) return false;
+    const strategy = this.resolve.getStrategy(
       attacker.attackStrategyId,
     );
     return strategy.canAttack(attacker, targetRow, targetCol, board);
@@ -110,9 +115,7 @@ export class UnitManager {
     boardRows: number,
     boardCols: number,
   ): AttackResult {
-    const strategy = AttackStrategyFactory.getStrategy(
-      attacker.attackStrategyId,
-    );
+    const strategy = this.resolve.getStrategy(attacker.attackStrategyId);
     return strategy.executeAttack(
       attacker,
       targetRow,

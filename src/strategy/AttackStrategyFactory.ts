@@ -1,4 +1,7 @@
-﻿import type { AttackStrategy } from "./AttackStrategy.js";
+﻿import type {
+  AttackStrategy,
+  AttackStrategyResolver,
+} from "./AttackStrategy.js";
 import { ArcherAttackStrategy } from "./ArcherAttackStrategy.js";
 import { MageAttackStrategy } from "./MageAttackStrategy.js";
 import { KnightAttackStrategy } from "./KnightAttackStrategy.js";
@@ -39,5 +42,10 @@ export class AttackStrategyFactory {
 
   public static hasStrategy(strategyId: string): boolean {
     return this.strategies.has(strategyId.toLowerCase());
+  }
+}
+export class DefaultAttackStrategyResolver implements AttackStrategyResolver {
+  getStrategy(id: string) {
+    return AttackStrategyFactory.getStrategy(id);
   }
 }

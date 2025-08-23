@@ -17,3 +17,6 @@ export interface AttackStrategy {
   ): AttackResult;
   getAttackType(): string;
 }
+export interface AttackStrategyResolver {
+  getStrategy(id: string): AttackStrategy;
+}
