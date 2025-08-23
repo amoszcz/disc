@@ -21,32 +21,26 @@ export class KnightAttackStrategy implements AttackStrategy {
       return false;
     }
 
-    // Knight can only attack targets in the same row (melee combat)
-    if (attacker.row !== targetRow) {
+    // New rule: Knight can act on any enemy unit in front (regardless of row),
+    // provided there is no ENEMY unit in the columns between the knight and target on the target's row.
+    // Determine forward direction by team: Team 1 charges to the right (increasing col), Team 2 to the left (decreasing col).
+    const dir = attacker.team === 1 ? 1 : -1;
+
+    // Target must be strictly in front in the appropriate direction
+    if ((dir === 1 && targetCol <= attacker.col) || (dir === -1 && targetCol >= attacker.col)) {
       return false;
     }
-   
-    const isEmpty = (row: number, col: number) => board[row][col] === null;
-    const  isAnyUnitInColumnsBetweenKnightAndTarget = isEmpty(attacker.row, attacker.col - 1) || isEmpty(attacker.row, attacker.col + 1); 
-    
-    //TODO: make Knight  attack any single unit only when there is no unit in the middle of the path 
-    return isAnyUnitInColumnsBetweenKnightAndTarget;
-    // Knight can only attack in specific columns based on team positioning
-    // const canAttackInColumn = this.isValidAttackColumn(attacker, targetCol);
-    // if (!canAttackInColumn) {
-    //   return false;
-    // }
-    
-   //  // Knight can only attack second column if there is no unit in the first column
-   // if (attacker.team === 1) {
-   //   if (targetCol === 1 && board[targetRow][0] !== null) {
-   //      return false;
-   //    }
-   // }
-      
 
-    // Check if knight is in the right position to attack that column
-   
+    // Scan along the target's row between attacker.col and targetCol (exclusive)
+    // If an ENEMY unit is found in between, the path is blocked and the knight cannot act.
+    for (let c = attacker.col + dir; dir === 1 ? c < targetCol : c > targetCol; c += dir) {
+      const between = board[targetRow][c];
+      if (between && between.isAlive && between.team !== attacker.team) {
+        return false;
+      }
+    }
+
+    return true;
   }
 
   private isValidAttackColumn(attacker: Unit, targetCol: number): boolean {
