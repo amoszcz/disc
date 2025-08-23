@@ -2,6 +2,7 @@
 import { UnitManager } from "../game/Unit.js";
 import { UnitRenderStrategyFactory } from "./strategy/UnitRenderStrategyFactory.js";
 import { DamageEffectManager } from "./effects/DamageEffectManager.js";
+import {UnitRenderStrategy} from "./strategy/UnitRenderStrategy";
 
 export class UnitRenderer {
   private config: GameConfig;
@@ -50,10 +51,6 @@ export class UnitRenderer {
           row * gameState.cellHeight +
           gameState.cellHeight / 2;
 
-        if (unit.isSelected) {
-          this.drawSelectionHighlight(ctx, centerX, centerY);
-        }
-
         this.drawUnit(ctx, unit, centerX, centerY, gameState.currentTurn);
         this.drawHealthBar(ctx, unit, centerX, centerY);
         this.drawUnitStats(ctx, unit, centerX, centerY);
@@ -66,26 +63,6 @@ export class UnitRenderer {
     }
   }
 
-  private drawSelectionHighlight(
-    ctx: CanvasRenderingContext2D,
-    centerX: number,
-    centerY: number,
-  ): void {
-    const time = Date.now() / 1000;
-    const pulseRadius = this.config.UNIT_RADIUS + 8 + Math.sin(time * 4) * 3;
-
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, pulseRadius, 0, 2 * Math.PI);
-    ctx.strokeStyle = "#ffff00";
-    ctx.lineWidth = 4;
-    ctx.stroke();
-
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, this.config.UNIT_RADIUS + 5, 0, 2 * Math.PI);
-    ctx.strokeStyle = "#ffd700";
-    ctx.lineWidth = 2;
-    ctx.stroke();
-  }
 
   private drawUnit(
     ctx: CanvasRenderingContext2D,
@@ -101,18 +78,8 @@ export class UnitRenderer {
     // Draw the unit shape using the strategy
     strategy.drawUnitShape(ctx, unit, centerX, centerY, this.config);
 
-    // Draw turn indicator for active units
-    if (unit.team === currentTurn && !unit.isSelected && !unit.hasActed) {
-      const visualConfig = strategy.getVisualConfig();
-      const baseColor =
-        unit.team === 1 ? visualConfig.team1Color : visualConfig.team2Color;
-
-      ctx.beginPath();
-      ctx.arc(centerX, centerY, this.config.UNIT_RADIUS + 2, 0, 2 * Math.PI);
-      ctx.strokeStyle = `rgba(${baseColor}, 0.3)`;
-      ctx.lineWidth = 2;
-      ctx.stroke();
-    }
+    // // Draw turn indicator for active units
+    // this.drawUnitSelection(unit, currentTurn, strategy, ctx, centerX, centerY);
 
     // Draw special effects if available
     if (strategy.drawSpecialEffects) {
@@ -129,26 +96,63 @@ export class UnitRenderer {
     }
   }
 
+  // private drawUnitSelection(unit: Unit, currentTurn: 1 | 2, strategy: UnitRenderStrategy, ctx: CanvasRenderingContext2D, centerX: number, centerY: number) {
+  //   if (unit.team === currentTurn && !unit.isSelected && !unit.hasActed) {
+  //     const visualConfig = strategy.getVisualConfig();
+  //     const baseColor =
+  //         unit.team === 1 ? visualConfig.team1Color : visualConfig.team2Color;
+  //
+  //     ctx.beginPath();
+  //     ctx.arc(centerX, centerY, this.config.UNIT_RADIUS + 2, 0, 2 * Math.PI);
+  //     ctx.strokeStyle = `rgba(${baseColor}, 0.3)`;
+  //     ctx.lineWidth = 2;
+  //     ctx.stroke();
+  //   }
+  // }
+
   private drawInactiveOverlay(
-    ctx: CanvasRenderingContext2D,
-    centerX: number,
-    centerY: number,
+      ctx: CanvasRenderingContext2D,
+      centerX: number,
+      centerY: number,
   ): void {
-    ctx.strokeStyle = "rgba(0, 0, 0, 0.6)";
-    ctx.lineWidth = 3;
+    const radius = this.config.UNIT_RADIUS;
 
-    const offset = this.config.UNIT_RADIUS * 0.7;
+    // Save the current state
+    ctx.save();
 
+    // Create a circular clipping path for the blur area
     ctx.beginPath();
-    ctx.moveTo(centerX - offset, centerY - offset);
-    ctx.lineTo(centerX + offset, centerY + offset);
-    ctx.stroke();
+    ctx.arc(centerX, centerY, radius + 10, 0, Math.PI * 2);
+    ctx.clip();
 
-    ctx.beginPath();
-    ctx.moveTo(centerX - offset, centerY + offset);
-    ctx.lineTo(centerX + offset, centerY - offset);
-    ctx.stroke();
+    // Apply blur filter to everything in the clipped area
+    ctx.filter = 'blur(4px)';
+
+    // Create a semi-transparent overlay that will blur the content beneath
+    const gradient = ctx.createRadialGradient(
+        centerX, centerY, 0,
+        centerX, centerY, radius + 10
+    );
+    gradient.addColorStop(0, 'rgba(0, 0, 0, 0.4)');
+    gradient.addColorStop(0.7, 'rgba(0, 0, 0, 0.6)');
+    gradient.addColorStop(1, 'rgba(0, 0, 0, 0.3)');
+
+    ctx.fillStyle = gradient;
+    ctx.fillRect(
+        centerX - radius - 10,
+        centerY - radius - 10,
+        (radius + 10) * 2,
+        (radius + 10) * 2
+    );
+
+    // Reset filter
+    ctx.filter = 'none';
+
+    // Restore the state (removes clipping)
+    ctx.restore();
+
   }
+
 
   private drawHealthBar(
     ctx: CanvasRenderingContext2D,

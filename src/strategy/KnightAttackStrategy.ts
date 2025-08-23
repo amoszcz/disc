@@ -25,15 +25,28 @@ export class KnightAttackStrategy implements AttackStrategy {
     if (attacker.row !== targetRow) {
       return false;
     }
-
+   
+    const isEmpty = (row: number, col: number) => board[row][col] === null;
+    const  isAnyUnitInColumnsBetweenKnightAndTarget = isEmpty(attacker.row, attacker.col - 1) || isEmpty(attacker.row, attacker.col + 1); 
+    
+    //TODO: make Knight  attack any single unit only when there is no unit in the middle of the path 
+    return isAnyUnitInColumnsBetweenKnightAndTarget;
     // Knight can only attack in specific columns based on team positioning
-    const canAttackInColumn = this.isValidAttackColumn(attacker, targetCol);
-    if (!canAttackInColumn) {
-      return false;
-    }
+    // const canAttackInColumn = this.isValidAttackColumn(attacker, targetCol);
+    // if (!canAttackInColumn) {
+    //   return false;
+    // }
+    
+   //  // Knight can only attack second column if there is no unit in the first column
+   // if (attacker.team === 1) {
+   //   if (targetCol === 1 && board[targetRow][0] !== null) {
+   //      return false;
+   //    }
+   // }
+      
 
     // Check if knight is in the right position to attack that column
-    return this.isKnightInAttackPosition(attacker, targetCol);
+   
   }
 
   private isValidAttackColumn(attacker: Unit, targetCol: number): boolean {

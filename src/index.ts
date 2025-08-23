@@ -175,6 +175,7 @@ window.addEventListener("load", async () => {
     battleModule.onBattleEnd = (result) => {
       console.log("Battle Result:", result);
       alert(`Battle ended! Winner: ${result.winner}`);
+      battleModule.endBattle();
     };
 
     // Start the battle
