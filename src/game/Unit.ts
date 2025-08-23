@@ -95,6 +95,7 @@ export class UnitManager {
     targetCol: number,
     board: (Unit | null)[][],
   ): boolean {
+      if (!attacker.attackStrategyId) return false;
     const strategy = AttackStrategyFactory.getStrategy(
       attacker.attackStrategyId,
     );

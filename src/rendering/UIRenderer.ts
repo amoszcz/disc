@@ -69,7 +69,7 @@ export class UIRenderer {
       buttonY,
       buttonWidth,
       buttonHeight,
-      "Start Game",
+      "Random battle",
       () => this.onStartGame(),
     );
 

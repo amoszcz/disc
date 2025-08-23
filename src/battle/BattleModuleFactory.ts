@@ -4,18 +4,18 @@ import { BattleManager } from "./BattleManager.js";
 
 export class BattleModuleFactory {
   public static createBattleModule(
-    canvasId: string,
+    canvasIdOrGame: string | import("../core/Game.js").Game,
     config?: Partial<GameConfig>,
   ): BattleModule {
-    return new BattleManager(canvasId, config);
+    return new BattleManager(canvasIdOrGame as any, config);
   }
 
   public static async createQuickBattle(
-    canvasId: string,
+    canvasIdOrGame: string | import("../core/Game.js").Game,
     battleSetup: BattleSetup,
     config?: Partial<GameConfig>,
   ): Promise<BattleModule> {
-    const battleModule = this.createBattleModule(canvasId, config);
+    const battleModule = this.createBattleModule(canvasIdOrGame as any, config);
     await battleModule.setupBattle(battleSetup);
     return battleModule;
   }

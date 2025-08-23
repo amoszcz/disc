@@ -2,6 +2,7 @@
 import type { BattleSetup, BattleUnit } from "./types/BattleTypes.js";
 import { BattleModuleFactory } from "./battle/BattleModuleFactory.js";
 import { UnitFactory } from "./utils/UnitFactory.js";
+import { Game } from "./core/Game.js";
 
 // Game configuration
 const CONFIG: GameConfig = {
@@ -153,35 +154,280 @@ const logBattleSetup = (battleSetup: BattleSetup): void => {
   console.log("\n" + "=".repeat(30));
 };
 
-// Initialize and start the battle when page loads
-window.addEventListener("load", async () => {
-  try {
-    // Use either the example or wounded battle setup
-    const battleSetup = createExampleBattle(); // or createWoundedBattle()
+//
+//
+// window.addEventListener("load", () => {
+//     // Create overlay menu (if it doesn’t exist yet)
+//     let menu = document.getElementById("menu-overlay");
+//     if (!menu) {
+//         menu = document.createElement("div");
+//         menu.id = "menu-overlay";
+//         Object.assign(menu.style, {
+//             position: "absolute",
+//             inset: "0",
+//             display: "flex",
+//             alignItems: "center",
+//             justifyContent: "center",
+//             background: "rgba(0,0,0,0.6)",
+//             color: "#fff",
+//             zIndex: "10",
+//             fontFamily: "sans-serif",
+//         } as CSSStyleDeclaration);
+//
+//         const panel = document.createElement("div");
+//         Object.assign(panel.style, {
+//             background: "#222",
+//             border: "1px solid #444",
+//             borderRadius: "8px",
+//             padding: "20px",
+//             minWidth: "260px",
+//             textAlign: "center",
+//             boxShadow: "0 6px 16px rgba(0,0,0,0.5)",
+//         } as CSSStyleDeclaration);
+//
+//         const title = document.createElement("h1");
+//         title.textContent = "Battle Simulator";
+//         Object.assign(title.style, { marginTop: "0", fontSize: "20px" } as CSSStyleDeclaration);
+//
+//         const subtitle = document.createElement("div");
+//         subtitle.id = "menu-subtitle";
+//         subtitle.textContent = "Main Menu";
+//         Object.assign(subtitle.style, { opacity: "0.8", marginBottom: "10px" } as CSSStyleDeclaration);
+//
+//         const randomBtn = document.createElement("button");
+//         randomBtn.textContent = "Random battle";
+//         Object.assign(randomBtn.style, {
+//             padding: "10px 14px",
+//             margin: "6px 0",
+//             borderRadius: "6px",
+//             border: "1px solid #666",
+//             background: "#2e7d32",
+//             color: "#fff",
+//             cursor: "pointer",
+//             fontWeight: "bold",
+//         } as CSSStyleDeclaration);
+//
+//         panel.appendChild(title);
+//         panel.appendChild(subtitle);
+//         panel.appendChild(randomBtn);
+//         menu.appendChild(panel);
+//         document.body.appendChild(menu);
+//
+//         randomBtn.onclick = () => startRandomBattle();
+//     }
+//
+//     const showMenu = (message?: string) => {
+//         const subtitle = document.getElementById("menu-subtitle");
+//         if (subtitle && message) subtitle.textContent = message;
+//         const overlay = document.getElementById("menu-overlay");
+//         if (overlay) overlay.style.display = "flex";
+//     };
+//     const hideMenu = () => {
+//         const overlay = document.getElementById("menu-overlay");
+//         if (overlay) overlay.style.display = "none";
+//     };
+//
+//     // Local battle session state
+//     let activeBattle: ReturnType<typeof BattleModuleFactory.createBattleModule> | null = null;
+//
+//     // Random helpers as you already have them
+//     const randInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+//
+//     const createRandomBattle = (): BattleSetup => {
+//         const rows = CONFIG.BOARD_ROWS;
+//         const cols = CONFIG.BOARD_COLS;
+//         const unitTypes = UnitFactory.getAvailableUnitTypes();
+//
+//         const positionsUsed = new Set<string>();
+//         const makePosKey = (r: number, c: number) => `${r}-${c}`;
+//         const pickFreePos = (colRange: { min: number; max: number }) => {
+//             for (let tries = 0; tries < 100; tries++) {
+//                 const r = randInt(0, rows - 1);
+//                 const c = randInt(colRange.min, colRange.max);
+//                 const key = makePosKey(r, c);
+//                 if (!positionsUsed.has(key)) {
+//                     positionsUsed.add(key);
+//                     return { row: r, col: c };
+//                 }
+//             }
+//             for (let r = 0; r < rows; r++) {
+//                 for (let c = colRange.min; c <= colRange.max; c++) {
+//                     const key = makePosKey(r, c);
+//                     if (!positionsUsed.has(key)) {
+//                         positionsUsed.add(key);
+//                         return { row: r, col: c };
+//                     }
+//                 }
+//             }
+//             return { row: 0, col: colRange.min };
+//         };
+//
+//         const unitCountPerTeam = Math.max(1, Math.min(4, randInt(2, 3)));
+//         const pickType = () => unitTypes[randInt(0, unitTypes.length - 1)];
+//
+//         const team1Units: BattleUnit[] = [];
+//         const team2Units: BattleUnit[] = [];
+//
+//         for (let i = 0; i < unitCountPerTeam; i++) {
+//             const type = pickType();
+//             const pos = pickFreePos({ min: 0, max: Math.max(0, Math.floor((cols - 1) / 2)) });
+//             const lifePct = Math.max(0.5, Math.random());
+//             team1Units.push(
+//                 UnitFactory.createNewBattleUnit(`t1-${type}-${i}-${Date.now()}`, type, 1, pos, lifePct),
+//             );
+//         }
+//
+//         for (let i = 0; i < unitCountPerTeam; i++) {
+//             const type = pickType();
+//             const pos = pickFreePos({ min: Math.floor(cols / 2), max: cols - 1 });
+//             const lifePct = Math.max(0.5, Math.random());
+//             team2Units.push(
+//                 UnitFactory.createNewBattleUnit(`t2-${type}-${i}-${Date.now()}`, type, 2, pos, lifePct),
+//             );
+//         }
+//
+//         return { team1Units, team2Units };
+//     };
+//
+//     async function startRandomBattle() {
+//         hideMenu();
+//         try {
+//             const battleSetup = createRandomBattle();
+//             logBattleSetup(battleSetup);
+//
+//             activeBattle = await BattleModuleFactory.createQuickBattle("game", battleSetup, CONFIG);
+//
+//             activeBattle.onBattleEvent = (event) => console.log("Battle Event:", event);
+//
+//             activeBattle.onBattleEnd = (result) => {
+//                 console.log("Battle Result:", result);
+//                 activeBattle = null;
+//                 showMenu(`Last result: Winner ${result.winner}`);
+//             };
+//
+//             const finalResult = await activeBattle.startBattle();
+//             console.log("Final battle result:", finalResult);
+//         } catch (error) {
+//             console.error("Error starting the battle:", error);
+//             showMenu("Error occurred. Back to menu");
+//         }
+//     }
+//
+//     // Crucial: show menu immediately, do not create any battle here.
+//     showMenu();
+// });
 
+
+// Decoupled startup: initialize Game in MENU state without creating any battle. Create battle only after user starts it.
+window.addEventListener("load", () => {
+  // Initialize Game independently in MENU state
+  const game = new Game(CONFIG, "game");
+  game.init().catch((e) => console.error("Failed to init Game:", e));
+  // Battle session state
+  let activeBattle: ReturnType<typeof BattleModuleFactory.createBattleModule> | null = null;
+
+  // Utility: generate a random integer in [min, max]
+  const randInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+
+  // Generate a random, valid battle setup based on CONFIG and available unit types
+  const createRandomBattle = (): BattleSetup => {
+    const rows = CONFIG.BOARD_ROWS;
+    const cols = CONFIG.BOARD_COLS;
+    const unitTypes = UnitFactory.getAvailableUnitTypes();
+
+    const positionsUsed = new Set<string>();
+    const makePosKey = (r: number, c: number) => `${r}-${c}`;
+    const pickFreePos = (colRange: { min: number; max: number }) => {
+      for (let tries = 0; tries < 100; tries++) {
+        const r = randInt(0, rows - 1);
+        const c = randInt(colRange.min, colRange.max);
+        const key = makePosKey(r, c);
+        if (!positionsUsed.has(key)) {
+          positionsUsed.add(key);
+          return { row: r, col: c };
+        }
+      }
+      for (let r = 0; r < rows; r++) {
+        for (let c = colRange.min; c <= colRange.max; c++) {
+          const key = makePosKey(r, c);
+          if (!positionsUsed.has(key)) {
+            positionsUsed.add(key);
+            return { row: r, col: c };
+          }
+        }
+      }
+      return { row: 0, col: colRange.min };
+    };
+
+    const unitCountPerTeam = Math.max(1, Math.min(4, randInt(2, 3)));
+    const pickType = () => unitTypes[randInt(0, unitTypes.length - 1)];
+
+    const team1Units: BattleUnit[] = [];
+    const team2Units: BattleUnit[] = [];
+
+    for (let i = 0; i < unitCountPerTeam; i++) {
+      const type = pickType();
+      const pos = pickFreePos({ min: 0, max: Math.max(0, Math.floor((cols - 1) / 2)) });
+      const lifePct = Math.max(0.5, Math.random());
+      team1Units.push(
+        UnitFactory.createNewBattleUnit(
+          `t1-${type}-${i}-${Date.now()}`,
+          type,
+          1,
+          pos,
+          lifePct,
+        ),
+      );
+    }
+
+    for (let i = 0; i < unitCountPerTeam; i++) {
+      const type = pickType();
+      const pos = pickFreePos({ min: Math.floor(cols / 2), max: cols - 1 });
+      const lifePct = Math.max(0.5, Math.random());
+      team2Units.push(
+        UnitFactory.createNewBattleUnit(
+          `t2-${type}-${i}-${Date.now()}`,
+          type,
+          2,
+          pos,
+          lifePct,
+        ),
+      );
+    }
+
+    return { team1Units, team2Units };
+  };
+
+  // Create and start a battle only when requested by user
+  const createAndSetupBattle = async (): Promise<void> => {
+    const battleSetup = createRandomBattle();
     logBattleSetup(battleSetup);
+    activeBattle = await BattleModuleFactory.createQuickBattle(game, battleSetup, CONFIG);
 
-    const battleModule = await BattleModuleFactory.createQuickBattle(
-      "game",
-      battleSetup,
-      CONFIG,
-    );
-
-    // Setup event listeners
-    battleModule.onBattleEvent = (event) => {
+    // Forward events (optional logging)
+    activeBattle.onBattleEvent = (event) => {
       console.log("Battle Event:", event);
     };
 
-    battleModule.onBattleEnd = (result) => {
+    activeBattle.onBattleEnd = (result) => {
       console.log("Battle Result:", result);
-      alert(`Battle ended! Winner: ${result.winner}`);
-      battleModule.endBattle();
+      // Cleanup; the in-canvas UI will handle showing menu/return flow
+      activeBattle = null;
     };
+  };
 
-    // Start the battle
-    const result = await battleModule.startBattle();
-    console.log("Final battle result:", result);
-  } catch (error) {
-    console.error("Error starting the battle:", error);
-  }
+  // Listen to the in-canvas menu "startGame" event
+  window.addEventListener("startGame", async () => {
+    try {
+      if (!activeBattle) {
+        await createAndSetupBattle();
+      }
+      if (activeBattle) {
+        const finalResult = await activeBattle.startBattle();
+        console.log("Final battle result:", finalResult);
+      }
+    } catch (error) {
+      console.error("Error starting the battle:", error);
+    }
+  });
 });

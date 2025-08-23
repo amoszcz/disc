@@ -21,7 +21,7 @@ export class BattleManager implements BattleModule {
   public onBattleEvent?: (event: BattleEvent) => void;
   public onBattleEnd?: (result: BattleResult) => void;
 
-  constructor(canvasId: string, config?: Partial<GameConfig>) {
+  constructor(canvasOrGame: string | Game, config?: Partial<GameConfig>) {
     // Default battle configuration
     this.config = {
       BOARD_ROWS: 3,
@@ -42,10 +42,16 @@ export class BattleManager implements BattleModule {
       events: [],
     };
 
-    // Get canvas element
-    this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
-    if (!this.canvas) {
-      throw new Error(`Canvas element with id '${canvasId}' not found`);
+    if (typeof canvasOrGame === "string") {
+      // Get canvas element for potential internal Game creation
+      this.canvas = document.getElementById(canvasOrGame) as HTMLCanvasElement;
+      if (!this.canvas) {
+        throw new Error(`Canvas element with id '${canvasOrGame}' not found`);
+      }
+    } else {
+      // External Game provided (preferred decoupled path)
+      this.game = canvasOrGame;
+      this.canvas = null; // Not needed when game is provided
     }
   }
 
@@ -57,9 +63,11 @@ export class BattleManager implements BattleModule {
     // Validate battle setup before proceeding
     this.validateBattleSetup(battleSetup);
 
-    // Initialize the game engine
-    this.game = new Game(this.config, this.canvas!);
-    await this.game.init();
+    // Initialize the game engine only if not provided externally
+    if (!this.game) {
+      this.game = new Game(this.config, this.canvas!);
+      await this.game.init();
+    }
 
     // Convert BattleUnits to game Units and place them
     this.setupUnitsOnBoard(battleSetup);
