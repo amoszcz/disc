@@ -8,6 +8,11 @@
 import { BoardManager } from "./Board.js";
 type GameStatusChangeHandler = (gameStatus: GameStatus) => void;
 import { DefaultScheduler, type Scheduler } from "../utils/Scheduler.js";
+import { StatusStateMachine } from "../core/domain/StatusStateMachine.js";
+import { appEventBus } from "../utils/EventBus.js";
+import { EntityIndex } from "../core/app/EntityIndex.js";
+import type { GameCommand } from "../core/domain/Commands.js";
+import { applyCommand as applyGameCommand } from "../core/domain/Commands.js";
 export class GameStateManager {
   private config: GameConfig;
   private readonly boardManager: BoardManager;
@@ -15,13 +20,23 @@ export class GameStateManager {
   private _gameStatus: GameStatus = GameStatus.MENU;
   private gameStatusChangeHandlers = new Array<GameStatusChangeHandler>();
   private scheduler: Scheduler;
+  private statusMachine: StatusStateMachine = new StatusStateMachine();
+  private entityIndex: EntityIndex = new EntityIndex();
 
   get gameStatus() {
     return this._gameStatus;
   }
   set gameStatus(gameStatus: GameStatus) {
+    if (!this.statusMachine.canTransition(this._gameStatus, gameStatus)) {
+      console.warn(
+        `Invalid status transition from ${this._gameStatus} to ${gameStatus}. Proceeding anyway.`,
+      );
+    }
     this._gameStatus = gameStatus;
     this.gameStatusChangeHandlers.forEach((handler) => handler(gameStatus));
+    try {
+      appEventBus.emit("gameStatusChanged", gameStatus as any);
+    } catch {}
   }
   constructor(config: GameConfig, scheduler: Scheduler = new DefaultScheduler()) {
     this.config = config;
@@ -38,6 +53,8 @@ export class GameStateManager {
       selectedUnit: null,
       availableTargets: [], // Initialize empty targets
     };
+    // Build initial entity index from the empty board
+    this.entityIndex.rebuild(this.gameState.board);
   }
   public addOnGameStatusChanged(handler: GameStatusChangeHandler): void {
     this.gameStatusChangeHandlers.push(handler);
@@ -138,6 +155,9 @@ export class GameStateManager {
       });
       this.gameState.selectedUnit = null;
       this.gameState.availableTargets = []; // Clear targets after attack
+
+      // Keep the entity index in sync
+      this.rebuildEntityIndex();
 
       this.checkGameOver();
       this.checkAutoEndTurn();
@@ -252,6 +272,8 @@ export class GameStateManager {
     this.deselectAllUnits();
     this.resetAllUnits();
     this.markInactiveUnitsWhenNoTargets();
+    // Keep the entity index in sync when turn changes
+    this.rebuildEntityIndex();
   }
 
   private markInactiveUnitsWhenNoTargets(): void {
@@ -291,5 +313,17 @@ export class GameStateManager {
 
   public getBoardManager(): BoardManager {
     return this.boardManager;
+  }
+
+  public rebuildEntityIndex(): void {
+    this.entityIndex.rebuild(this.gameState.board);
+  }
+
+  public getEntityIndex(): EntityIndex {
+    return this.entityIndex;
+  }
+
+  public applyCommand(cmd: GameCommand): any {
+    return applyGameCommand(this, cmd);
   }
 }

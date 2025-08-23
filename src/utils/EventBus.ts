@@ -1,8 +1,8 @@
 ﻿// A tiny typed EventBus for app-wide events without relying on window events
 
-export type AppEvents = {
-  startGame: void;
-};
+import type { CoreEvents } from "../core/domain/Events.js";
+
+export type AppEvents = CoreEvents;
 
 export interface EventBus<E> {
   on<K extends keyof E>(type: K, handler: (payload: E[K]) => void): void;

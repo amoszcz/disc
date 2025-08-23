@@ -7,9 +7,9 @@
   BattleState,
 } from "../types/BattleTypes.js";
 import type { GameConfig, Unit } from "../types/GameTypes.js";
-import { Game } from "../core/Game.js";
 import { UnitFactory } from "../utils/UnitFactory.js";
 import type { IGame } from "../types/Ports.js";
+import { appEventBus } from "../utils/EventBus.js";
 
 export class BattleManager implements BattleModule {
   private game: IGame | null = null;
@@ -22,7 +22,7 @@ export class BattleManager implements BattleModule {
   public onBattleEvent?: (event: BattleEvent) => void;
   public onBattleEnd?: (result: BattleResult) => void;
 
-  constructor(canvasId: string, config: Partial<GameConfig>, game:IGame) {
+  constructor(canvasId: string, config: Partial<GameConfig>, game: IGame) {
     // Default battle configuration
 
     this.config = {
@@ -43,14 +43,14 @@ export class BattleManager implements BattleModule {
       units: [],
       events: [],
     };
-      this.game = game;
+    this.game = game;
     if (typeof canvasId === "string") {
       // Get canvas element for potential internal Game creation
       this.canvas = document.getElementById(canvasId) as HTMLCanvasElement;
       if (!this.canvas) {
         throw new Error(`Canvas element with id '${canvasId}' not found`);
       }
-    } 
+    }
   }
 
   public async setupBattle(battleSetup: BattleSetup): Promise<void> {
@@ -60,7 +60,6 @@ export class BattleManager implements BattleModule {
 
     // Validate battle setup before proceeding
     this.validateBattleSetup(battleSetup);
-
 
     // Convert BattleUnits to game Units and place them
     this.setupUnitsOnBoard(battleSetup);
@@ -163,6 +162,9 @@ export class BattleManager implements BattleModule {
           `with ${Math.round(battleUnit.lifePercentage * 100)}% health`,
       );
     });
+
+    // Rebuild entity index for fast queries
+    gameStateManager.rebuildEntityIndex();
   }
 
   private isValidPosition(row: number, col: number): boolean {
@@ -214,6 +216,11 @@ export class BattleManager implements BattleModule {
   private addBattleEvent(event: BattleEvent): void {
     this.battleEvents.push(event);
     this.battleState.events = this.battleEvents;
+
+    // Emit strongly-typed event via the app event bus
+    try {
+      appEventBus.emit("battleEvent", event as any);
+    } catch {}
 
     if (this.onBattleEvent) {
       this.onBattleEvent(event);
