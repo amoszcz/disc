@@ -30,6 +30,10 @@ export class GameLoop {
     requestAnimationFrame((timestamp) => this.loop(timestamp));
   }
 
+  public stop(): void {
+    this.isRunning = false;
+  }
+
   private loop(timestamp: number): void {
     if (
       !this.isRunning ||

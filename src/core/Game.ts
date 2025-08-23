@@ -117,4 +117,8 @@ export class Game {
       this.onGameEnd();
     }
   }
+
+  public stop(): void {
+    this.gameLoop.stop();
+  }
 }
