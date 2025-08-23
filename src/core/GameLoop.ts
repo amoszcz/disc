@@ -47,6 +47,7 @@ export class GameLoop {
     // Render game
     this.renderer.render(
       this.canvasManager.ctx,
+      this.gameStateManager.gameStatus,
       this.gameStateManager.gameState,
       this.canvasManager.canvas.width,
       this.canvasManager.canvas.height,

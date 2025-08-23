@@ -31,10 +31,6 @@ export class InputManager {
     window.addEventListener("keydown", (event) => {
       this.handleKeyDown(event);
     });
-
-    window.addEventListener("startGame", () => {
-      this.gameStateManager.startGame();
-    });
   }
 
   private handleMouseMove(event: MouseEvent): void {
@@ -54,10 +50,7 @@ export class InputManager {
     const buttonManager = this.renderer.getUIRenderer().getButtonManager();
     const buttonClicked = buttonManager.handleMouseClick(mouseX, mouseY);
 
-    if (
-      !buttonClicked &&
-      this.gameStateManager.gameState.gameStatus === "playing"
-    ) {
+    if (!buttonClicked && this.gameStateManager.gameStatus === "playing") {
       this.handleUnitSelection(mouseX, mouseY);
     }
   }
@@ -139,19 +132,19 @@ export class InputManager {
   private handleKeyDown(event: KeyboardEvent): void {
     switch (event.key.toLowerCase()) {
       case "r":
-        if (this.gameStateManager.gameState.gameStatus === "game_over") {
+        if (this.gameStateManager.gameStatus === "game_over") {
           this.gameStateManager.returnToMenu();
         }
         break;
       case "escape":
-        if (this.gameStateManager.gameState.gameStatus === "playing") {
+        if (this.gameStateManager.gameStatus === "playing") {
           this.gameStateManager.pauseGame();
-        } else if (this.gameStateManager.gameState.gameStatus === "paused") {
+        } else if (this.gameStateManager.gameStatus === "paused") {
           this.gameStateManager.resumeGame();
         }
         break;
       case " ":
-        if (this.gameStateManager.gameState.gameStatus === "playing") {
+        if (this.gameStateManager.gameStatus === "playing") {
           this.gameStateManager.switchTurn();
         }
         break;

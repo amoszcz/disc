@@ -1,17 +1,26 @@
-﻿import type {
-  GameState,
-  GameConfig,
+﻿import {
   AttackResult,
+  GameConfig,
+  GameState,
+  GameStatus,
   Unit,
 } from "../types/GameTypes.js";
-import { GameStatus } from "../types/GameTypes.js";
 import { BoardManager } from "./Board.js";
-
+type GameStatusChangeHandler = (gameStatus: GameStatus) => void;
 export class GameStateManager {
   private config: GameConfig;
   private readonly boardManager: BoardManager;
   public gameState: GameState;
+  private _gameStatus: GameStatus = GameStatus.MENU;
+  private gameStatusChangeHandlers = new Array<GameStatusChangeHandler>();
 
+  get gameStatus() {
+    return this._gameStatus;
+  }
+  set gameStatus(gameStatus: GameStatus) {
+    this._gameStatus = gameStatus;
+    this.gameStatusChangeHandlers.forEach((handler) => handler(gameStatus));
+  }
   constructor(config: GameConfig) {
     this.config = config;
     this.boardManager = new BoardManager(config);
@@ -22,13 +31,20 @@ export class GameStateManager {
       cellHeight: config.CELL_SIZE,
       boardOffsetX: 0,
       boardOffsetY: 0,
-      gameStatus: GameStatus.MENU,
       currentTurn: 1,
       selectedUnit: null,
       availableTargets: [], // Initialize empty targets
     };
   }
-
+  public addOnGameStatusChanged(handler: GameStatusChangeHandler): void {
+    this.gameStatusChangeHandlers.push(handler);
+  }
+  public removeOnGameStatusChanged(handler: GameStatusChangeHandler): void {
+    this.gameStatusChangeHandlers.splice(
+      this.gameStatusChangeHandlers.indexOf(handler),
+      1,
+    );
+  }
   public calculateBoardLayout(canvasWidth: number, canvasHeight: number): void {
     const boardWidth = this.config.BOARD_COLS * this.config.CELL_SIZE;
     const boardHeight = this.config.BOARD_ROWS * this.config.CELL_SIZE;
@@ -37,16 +53,6 @@ export class GameStateManager {
     this.gameState.cellHeight = this.config.CELL_SIZE;
     this.gameState.boardOffsetX = (canvasWidth - boardWidth) / 2;
     this.gameState.boardOffsetY = (canvasHeight - boardHeight) / 2;
-  }
-
-  public startGame(): void {
-    this.gameState.gameStatus = GameStatus.PLAYING;
-    this.gameState.currentTurn = 1;
-    this.gameState.selectedUnit = null;
-    this.gameState.availableTargets = [];
-    this.gameState.board = this.boardManager.initializeBoard();
-
-    this.markInactiveUnitsWhenNoTargets();
   }
 
   public selectUnit(row: number, col: number): boolean {
@@ -141,9 +147,9 @@ export class GameStateManager {
     const aliveTeams = this.getAliveTeams();
 
     if (aliveTeams.team1 === 0) {
-      this.gameState.gameStatus = GameStatus.GAME_OVER;
+      this.gameStatus = GameStatus.GAME_OVER;
     } else if (aliveTeams.team2 === 0) {
-      this.gameState.gameStatus = GameStatus.GAME_OVER;
+      this.gameStatus = GameStatus.GAME_OVER;
     }
   }
 
@@ -222,19 +228,19 @@ export class GameStateManager {
   }
 
   public pauseGame(): void {
-    if (this.gameState.gameStatus === GameStatus.PLAYING) {
-      this.gameState.gameStatus = GameStatus.PAUSED;
+    if (this.gameStatus === GameStatus.PLAYING) {
+      this.gameStatus = GameStatus.PAUSED;
     }
   }
 
   public resumeGame(): void {
-    if (this.gameState.gameStatus === GameStatus.PAUSED) {
-      this.gameState.gameStatus = GameStatus.PLAYING;
+    if (this.gameStatus === GameStatus.PAUSED) {
+      this.gameStatus = GameStatus.PLAYING;
     }
   }
 
   public returnToMenu(): void {
-    this.gameState.gameStatus = GameStatus.MENU;
+    this.gameStatus = GameStatus.MENU;
     this.deselectAllUnits();
   }
 

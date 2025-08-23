@@ -37,6 +37,15 @@ export class Game {
       this.gameStateManager.getBoardManager().getUnitManager(),
     );
 
+    // React to game status changes to notify end-of-game instantly
+    this.gameStateManager.addOnGameStatusChanged((status) => {
+      if (status === GameStatus.GAME_OVER) {
+        if (this.onGameEnd) {
+          this.onGameEnd();
+        }
+      }
+    });
+
     if (!this.canvasManager.canvas) {
       throw new Error("Could not initialize canvas");
     }
@@ -91,19 +100,19 @@ export class Game {
   }
 
   public startGame(): void {
-    this.gameStateManager.gameState.gameStatus = GameStatus.PLAYING;
+    this.gameStateManager.gameStatus = GameStatus.PLAYING;
   }
 
   public pauseGame(): void {
-    this.gameStateManager.gameState.gameStatus = GameStatus.PAUSED;
+    this.gameStateManager.gameStatus = GameStatus.PAUSED;
   }
 
   public resumeGame(): void {
-    this.gameStateManager.gameState.gameStatus = GameStatus.PLAYING;
+    this.gameStateManager.gameStatus = GameStatus.PLAYING;
   }
 
   public endGame(): void {
-    this.gameStateManager.gameState.gameStatus = GameStatus.GAME_OVER;
+    this.gameStateManager.gameStatus = GameStatus.GAME_OVER;
     if (this.onGameEnd) {
       this.onGameEnd();
     }

@@ -153,7 +153,9 @@ const logBattleSetup = (battleSetup: BattleSetup): void => {
   logTeam(battleSetup.team2Units, "Team 2");
   console.log("\n" + "=".repeat(30));
 };
-
+let activeBattle: ReturnType<
+  typeof BattleModuleFactory.createBattleModule
+> | null = null;
 
 // Decoupled startup: initialize Game in MENU state without creating any battle. Create battle only after user starts it.
 window.addEventListener("load", () => {
@@ -161,10 +163,10 @@ window.addEventListener("load", () => {
   const game = new Game(CONFIG, "game");
   game.init().catch((e) => console.error("Failed to init Game:", e));
   // Battle session state
-  let activeBattle: ReturnType<typeof BattleModuleFactory.createBattleModule> | null = null;
 
   // Utility: generate a random integer in [min, max]
-  const randInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
+  const randInt = (min: number, max: number) =>
+    Math.floor(Math.random() * (max - min + 1)) + min;
 
   // Generate a random, valid battle setup based on CONFIG and available unit types
   const createRandomBattle = (): BattleSetup => {
@@ -204,7 +206,10 @@ window.addEventListener("load", () => {
 
     for (let i = 0; i < unitCountPerTeam; i++) {
       const type = pickType();
-      const pos = pickFreePos({ min: 0, max: Math.max(0, Math.floor((cols - 1) / 2)) });
+      const pos = pickFreePos({
+        min: 0,
+        max: Math.max(0, Math.floor((cols - 1) / 2)),
+      });
       const lifePct = Math.max(0.5, Math.random());
       team1Units.push(
         UnitFactory.createNewBattleUnit(
@@ -239,18 +244,17 @@ window.addEventListener("load", () => {
   const createAndSetupBattle = async (): Promise<void> => {
     const battleSetup = createRandomBattle();
     logBattleSetup(battleSetup);
-    activeBattle = await BattleModuleFactory.createQuickBattle("game", battleSetup, game, CONFIG);
+    activeBattle = await BattleModuleFactory.createQuickBattle(
+      "game",
+      battleSetup,
+      game,
+      CONFIG,
+    );
 
     // Forward events (optional logging)
     activeBattle.onBattleEvent = (event) => {
       console.log("Battle Event:", event);
-    };
-
-    activeBattle.onBattleEnd = (result) => {
-      console.log("Battle Result:", result);
-      // Cleanup; the in-canvas UI will handle showing menu/return flow
-        game.endGame()
-      activeBattle = null;
+      if (event.type === "battle_end") activeBattle = null;
     };
   };
 

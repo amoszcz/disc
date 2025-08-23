@@ -1,4 +1,4 @@
-﻿import type { GameState, GameConfig } from "../types/GameTypes.js";
+﻿import { GameState, GameConfig, GameStatus } from "../types/GameTypes.js";
 import { BoardRenderer } from "./BoardRenderer.js";
 import { UnitRenderer } from "./UnitRenderer.js";
 import { UIRenderer } from "./UIRenderer.js";
@@ -17,15 +17,16 @@ export class Renderer {
 
   public render(
     ctx: CanvasRenderingContext2D,
+    gameStatus: GameStatus,
     gameState: GameState,
     canvasWidth: number,
     canvasHeight: number,
   ): void {
     // Only draw board and units when playing
     if (
-      gameState.gameStatus === "playing" ||
-      gameState.gameStatus === "paused" ||
-      gameState.gameStatus === "game_over"
+      gameStatus === "playing" ||
+      gameStatus === "paused" ||
+      gameStatus === "game_over"
     ) {
       // Draw board first (includes target highlights)
       this.boardRenderer.drawBoard(ctx, gameState);
@@ -34,7 +35,13 @@ export class Renderer {
     }
 
     // Always draw UI (handles different states internally)
-    this.uiRenderer.drawUI(ctx, gameState, canvasWidth, canvasHeight);
+    this.uiRenderer.drawUI(
+      ctx,
+      gameState,
+      gameStatus,
+      canvasWidth,
+      canvasHeight,
+    );
   }
 
   public getUIRenderer(): UIRenderer {

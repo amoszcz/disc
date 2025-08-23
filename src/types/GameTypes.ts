@@ -59,7 +59,6 @@ export interface GameState {
   cellHeight: number;
   boardOffsetX: number;
   boardOffsetY: number;
-  gameStatus: GameStatus;
   currentTurn: 1 | 2;
   selectedUnit: Unit | null;
   availableTargets: BoardPosition[];

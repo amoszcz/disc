@@ -14,10 +14,11 @@ export class UIRenderer {
   public drawUI(
     ctx: CanvasRenderingContext2D,
     gameState: GameState,
+    gameStatus: GameStatus,
     canvasWidth: number,
     canvasHeight: number,
   ): void {
-    switch (gameState.gameStatus) {
+    switch (gameStatus) {
       case GameStatus.MENU:
         this.drawMenuScreen(ctx, canvasWidth, canvasHeight);
         break;
