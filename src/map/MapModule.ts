@@ -1,6 +1,15 @@
-﻿export type MapModuleOptions = {
+﻿export type MapSquare = { id: string; row: number; col: number };
+export type MapSnapshot = {
+  playerRow: number;
+  playerCol: number;
+  playerSelected: boolean;
+  squares: MapSquare[];
+};
+
+export type MapModuleOptions = {
   gridSize?: number; // default 20
   paddingRatio?: number; // default 0.1 of min(canvas)
+  initialState?: MapSnapshot;
 };
 
 export class MapModule {
@@ -32,7 +41,12 @@ export class MapModule {
   private moveSpeedPxPerSec = 300; // movement speed
   private lastTime: number | null = null;
 
+  // Squares (collectibles)
+  private squares: MapSquare[] = [];
+  private squaresInitialized = false;
+
   public onExit?: () => void;
+  public onSquareReached?: (squareId: string, snapshot: MapSnapshot) => void;
 
   constructor(canvasId: string = "game", opts: MapModuleOptions = {}) {
     const canvas = document.getElementById(canvasId) as HTMLCanvasElement | null;
@@ -46,14 +60,59 @@ export class MapModule {
     this.gridSize = opts.gridSize ?? 20;
     this.paddingRatio = opts.paddingRatio ?? 0.1;
 
+    // Initialize from snapshot or defer square creation until start()
+    if (opts.initialState) {
+      this.playerRow = opts.initialState.playerRow;
+      this.playerCol = opts.initialState.playerCol;
+      this.playerSelected = opts.initialState.playerSelected;
+      this.squares = opts.initialState.squares.map((s) => ({ ...s }));
+      this.squaresInitialized = true;
+    } else {
+      this.playerRow = 10;
+      this.playerCol = 10;
+      this.playerSelected = false;
+      // squares will be generated once in start()
+    }
+
     this.handleResize = this.handleResize.bind(this);
     this.onClick = this.onClick.bind(this);
     this.onKeyDown = this.onKeyDown.bind(this);
   }
 
+  private generateInitialSquares(count: number): MapSquare[] {
+    const squares: MapSquare[] = [];
+    const used = new Set<string>();
+    const key = (r: number, c: number) => `${r}:${c}`;
+    used.add(key(this.playerRow, this.playerCol));
+    while (squares.length < count) {
+      const r = Math.floor(Math.random() * this.gridSize);
+      const c = Math.floor(Math.random() * this.gridSize);
+      const k = key(r, c);
+      if (used.has(k)) continue;
+      used.add(k);
+      squares.push({ id: `sq-${Date.now()}-${squares.length}-${Math.random()}`, row: r, col: c });
+    }
+    return squares;
+  }
+
+  public getSnapshot(): MapSnapshot {
+    return {
+      playerRow: this.playerRow,
+      playerCol: this.playerCol,
+      playerSelected: this.playerSelected,
+      squares: this.squares.map((s) => ({ ...s })),
+    };
+  }
+
   public start(): void {
     if (this.running) return;
     this.running = true;
+
+    // Lazily initialize squares once per MapModule lifetime
+    if (!this.squaresInitialized) {
+      this.squares = this.generateInitialSquares(2);
+      this.squaresInitialized = true;
+    }
 
     window.addEventListener("resize", this.handleResize);
     this.canvas.addEventListener("click", this.onClick);
@@ -121,6 +180,7 @@ export class MapModule {
     // Draw
     this.drawGrid();
     this.drawCoordinates();
+    this.drawSquares();
     this.drawPlayer();
 
     // Footer hint
@@ -179,6 +239,20 @@ export class MapModule {
       const x = this.offsetX - Math.min(16, Math.floor(this.cellSize * 0.6));
       const y = this.offsetY + r * this.cellSize + this.cellSize / 2;
       this.ctx.fillText(String(r), x, y);
+    }
+  }
+
+  private drawSquares(): void {
+    const pad = Math.max(2, Math.floor(this.cellSize * 0.1));
+    this.ctx.lineWidth = 2;
+    for (const sq of this.squares) {
+      const x = this.offsetX + sq.col * this.cellSize + pad;
+      const y = this.offsetY + sq.row * this.cellSize + pad;
+      const size = this.cellSize - pad * 2;
+      this.ctx.fillStyle = "#d84315"; // deep orange
+      this.ctx.strokeStyle = "#bf360c";
+      this.ctx.fillRect(x, y, size, size);
+      this.ctx.strokeRect(x, y, size, size);
     }
   }
 
@@ -301,6 +375,12 @@ export class MapModule {
       this.playerRow = this.targetRow ?? this.playerRow;
       this.playerCol = this.targetCol ?? this.playerCol;
       this.isMoving = false;
+      // Check square collision upon arrival
+      const hit = this.squares.find((s) => s.row === this.playerRow && s.col === this.playerCol);
+      if (hit && this.onSquareReached) {
+        // Emit with current snapshot
+        this.onSquareReached(hit.id, this.getSnapshot());
+      }
       return;
     }
 
