@@ -12,6 +12,8 @@ export type MapModuleOptions = {
   initialState?: MapSnapshot;
 };
 
+import { clampDestination, createSnapshot, findHitSquareId } from "./MapLogic.js";
+
 export class MapModule {
   private canvas: HTMLCanvasElement;
   private ctx: CanvasRenderingContext2D;
@@ -334,9 +336,8 @@ export class MapModule {
     // If player is selected and clicked somewhere else on the map: set destination
     if (this.playerSelected) {
       // Clamp inside map
-      const destRow = Math.max(0, Math.min(this.gridSize - 1, pos.row));
-      const destCol = Math.max(0, Math.min(this.gridSize - 1, pos.col));
-      this.setDestination(destRow, destCol);
+      const clamped = clampDestination(pos.row, pos.col, this.gridSize);
+      this.setDestination(clamped.row, clamped.col);
       return;
     }
 
@@ -401,12 +402,16 @@ export class MapModule {
       this.playerCol = this.targetCol ?? this.playerCol;
       this.isMoving = false;
       // Check square collision upon arrival
-      const hit = this.squares.find(
-        (s) => s.row === this.playerRow && s.col === this.playerCol,
-      );
-      if (hit && this.onSquareReached) {
-        // Emit with current snapshot
-        this.onSquareReached(hit.id, this.getSnapshot());
+      const hitId = findHitSquareId(this.squares, this.playerRow, this.playerCol);
+      if (hitId && this.onSquareReached) {
+        // Emit with current snapshot (via helper to ensure deep copy semantics)
+        const snap = createSnapshot({
+          playerRow: this.playerRow,
+          playerCol: this.playerCol,
+          playerSelected: this.playerSelected,
+          squares: this.squares,
+        });
+        this.onSquareReached(hitId, snap);
       }
       return;
     }
