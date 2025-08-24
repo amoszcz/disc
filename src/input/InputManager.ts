@@ -8,6 +8,11 @@ export class InputManager {
   private attackMessage: string = "";
   private attackMessageTime: number = 0;
 
+  private onMouseMove = (event: MouseEvent) => this.handleMouseMove(event);
+  private onClick = (event: MouseEvent) => this.handleMouseClick(event);
+  private onKeyDown = (event: KeyboardEvent) => this.handleKeyDown(event);
+  private attached: boolean = false;
+
   constructor(
     canvas: HTMLCanvasElement,
     gameStateManager: GameStateManager,
@@ -16,21 +21,23 @@ export class InputManager {
     this.canvas = canvas;
     this.gameStateManager = gameStateManager;
     this.renderer = renderer;
-    this.setupEventListeners();
+    this.attachEventListeners();
   }
 
-  private setupEventListeners(): void {
-    this.canvas.addEventListener("mousemove", (event) => {
-      this.handleMouseMove(event);
-    });
+  public attachEventListeners(): void {
+    if (this.attached) return;
+    this.canvas.addEventListener("mousemove", this.onMouseMove);
+    this.canvas.addEventListener("click", this.onClick);
+    window.addEventListener("keydown", this.onKeyDown);
+    this.attached = true;
+  }
 
-    this.canvas.addEventListener("click", (event) => {
-      this.handleMouseClick(event);
-    });
-
-    window.addEventListener("keydown", (event) => {
-      this.handleKeyDown(event);
-    });
+  public detachEventListeners(): void {
+    if (!this.attached) return;
+    this.canvas.removeEventListener("mousemove", this.onMouseMove);
+    this.canvas.removeEventListener("click", this.onClick);
+    window.removeEventListener("keydown", this.onKeyDown);
+    this.attached = false;
   }
 
   private handleMouseMove(event: MouseEvent): void {

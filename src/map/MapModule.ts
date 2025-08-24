@@ -49,7 +49,9 @@ export class MapModule {
   public onSquareReached?: (squareId: string, snapshot: MapSnapshot) => void;
 
   constructor(canvasId: string = "game", opts: MapModuleOptions = {}) {
-    const canvas = document.getElementById(canvasId) as HTMLCanvasElement | null;
+    const canvas = document.getElementById(
+      canvasId,
+    ) as HTMLCanvasElement | null;
     if (!canvas) throw new Error(`Canvas '${canvasId}' not found`);
     const ctx = canvas.getContext("2d");
     if (!ctx) throw new Error("2D context not available");
@@ -80,6 +82,7 @@ export class MapModule {
   }
 
   private generateInitialSquares(count: number): MapSquare[] {
+    console.log("generateInitialSquares");
     const squares: MapSquare[] = [];
     const used = new Set<string>();
     const key = (r: number, c: number) => `${r}:${c}`;
@@ -90,7 +93,11 @@ export class MapModule {
       const k = key(r, c);
       if (used.has(k)) continue;
       used.add(k);
-      squares.push({ id: `sq-${Date.now()}-${squares.length}-${Math.random()}`, row: r, col: c });
+      squares.push({
+        id: `sq-${Date.now()}-${squares.length}-${Math.random()}`,
+        row: r,
+        col: c,
+      });
     }
     return squares;
   }
@@ -166,8 +173,12 @@ export class MapModule {
     if (!this.running) return;
 
     // Time step
-    if (this.lastTime === null && typeof time === "number") this.lastTime = time;
-    const dt = typeof time === "number" && this.lastTime !== null ? (time - this.lastTime) / 1000 : 0;
+    if (this.lastTime === null && typeof time === "number")
+      this.lastTime = time;
+    const dt =
+      typeof time === "number" && this.lastTime !== null
+        ? (time - this.lastTime) / 1000
+        : 0;
     if (typeof time === "number") this.lastTime = time ?? this.lastTime;
 
     // Update movement
@@ -187,7 +198,11 @@ export class MapModule {
     this.ctx.fillStyle = "#555";
     this.ctx.font = "16px Arial";
     this.ctx.textAlign = "center";
-    this.ctx.fillText("Click triangle to select, then click a cell to move. Press R to return to menu.", this.canvas.width / 2, this.offsetY + this.cellSize * this.gridSize + 30);
+    this.ctx.fillText(
+      "Click triangle to select, then click a cell to move. Press R to return to menu.",
+      this.canvas.width / 2,
+      this.offsetY + this.cellSize * this.gridSize + 30,
+    );
 
     this.rafId = requestAnimationFrame(this.loop);
   };
@@ -291,7 +306,13 @@ export class MapModule {
       this.ctx.strokeStyle = "#8e24aa";
       this.ctx.lineWidth = 1;
       this.ctx.beginPath();
-      this.ctx.arc(this.targetX, this.targetY, Math.max(6, s * 0.7), 0, Math.PI * 2);
+      this.ctx.arc(
+        this.targetX,
+        this.targetY,
+        Math.max(6, s * 0.7),
+        0,
+        Math.PI * 2,
+      );
       this.ctx.stroke();
     }
   }
@@ -330,7 +351,10 @@ export class MapModule {
     }
   }
 
-  private pixelToCell(px: number, py: number): { row: number; col: number } | null {
+  private pixelToCell(
+    px: number,
+    py: number,
+  ): { row: number; col: number } | null {
     const size = this.cellSize * this.gridSize;
     if (
       px < this.offsetX ||
@@ -361,7 +385,8 @@ export class MapModule {
   }
 
   private updateMovement(dt: number): void {
-    if (!this.isMoving || this.targetX === null || this.targetY === null) return;
+    if (!this.isMoving || this.targetX === null || this.targetY === null)
+      return;
 
     const dx = this.targetX - this.playerX;
     const dy = this.targetY - this.playerY;
@@ -376,7 +401,9 @@ export class MapModule {
       this.playerCol = this.targetCol ?? this.playerCol;
       this.isMoving = false;
       // Check square collision upon arrival
-      const hit = this.squares.find((s) => s.row === this.playerRow && s.col === this.playerCol);
+      const hit = this.squares.find(
+        (s) => s.row === this.playerRow && s.col === this.playerCol,
+      );
       if (hit && this.onSquareReached) {
         // Emit with current snapshot
         this.onSquareReached(hit.id, this.getSnapshot());

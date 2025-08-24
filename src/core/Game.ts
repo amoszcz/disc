@@ -80,8 +80,10 @@ export class Game {
     return true;
   }
 
+  private resizeHandler = () => this.resizeCanvas();
+
   private setupWindowEvents(): void {
-    window.addEventListener("resize", () => this.resizeCanvas());
+    window.addEventListener("resize", this.resizeHandler);
   }
 
   private resizeCanvas(): void {
@@ -119,6 +121,9 @@ export class Game {
   }
 
   public stop(): void {
+    // Stop loop and detach inputs + window handlers
     this.gameLoop.stop();
+    this.inputManager.detachEventListeners();
+    window.removeEventListener("resize", this.resizeHandler);
   }
 }
