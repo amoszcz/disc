@@ -6,6 +6,16 @@ import { ConfigLoader } from "../config/ConfigLoader.js";
 export class UnitFactory {
   private static configLoader = ConfigLoader.getInstance();
 
+  // Testing seam: allow injecting a mock config loader in tests
+  public static setConfigLoaderForTests(loader: Pick<ConfigLoader, 'getUnitConfig' | 'isValidUnitType' | 'getAvailableUnitTypes'>): void {
+    // @ts-expect-error allow minimal interface for tests
+    this.configLoader = loader;
+  }
+
+  public static resetConfigLoader(): void {
+    this.configLoader = ConfigLoader.getInstance();
+  }
+
   /**
    * Creates a game Unit from a BattleUnit using configuration data
    */

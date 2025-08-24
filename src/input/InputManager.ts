@@ -1,5 +1,6 @@
 ﻿import type { GameStateManager } from "../game/GameState.js";
 import type { Renderer } from "../rendering/Renderer.js";
+import { mapKeyToAction } from "./InputLogic.js";
 
 export class InputManager {
   private gameStateManager: GameStateManager;
@@ -137,23 +138,22 @@ export class InputManager {
   }
 
   private handleKeyDown(event: KeyboardEvent): void {
-    switch (event.key.toLowerCase()) {
-      case "r":
-        if (this.gameStateManager.gameStatus === "game_over") {
-          this.gameStateManager.returnToMenu();
-        }
+    const action = mapKeyToAction(this.gameStateManager.gameStatus, event.key);
+    switch (action) {
+      case "returnToMenu":
+        this.gameStateManager.returnToMenu();
         break;
-      case "escape":
-        if (this.gameStateManager.gameStatus === "playing") {
-          this.gameStateManager.pauseGame();
-        } else if (this.gameStateManager.gameStatus === "paused") {
-          this.gameStateManager.resumeGame();
-        }
+      case "pause":
+        this.gameStateManager.pauseGame();
         break;
-      case " ":
-        if (this.gameStateManager.gameStatus === "playing") {
-          this.gameStateManager.switchTurn();
-        }
+      case "resume":
+        this.gameStateManager.resumeGame();
+        break;
+      case "switchTurn":
+        this.gameStateManager.switchTurn();
+        break;
+      default:
+        // no-op
         break;
     }
   }

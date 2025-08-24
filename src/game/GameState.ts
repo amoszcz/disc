@@ -6,6 +6,7 @@
   Unit,
 } from "../types/GameTypes.js";
 import { BoardManager } from "./Board.js";
+import { computeBoardLayout } from "../rendering/BoardMath.js";
 type GameStatusChangeHandler = (gameStatus: GameStatus) => void;
 import { DefaultScheduler, type Scheduler } from "../utils/Scheduler.js";
 import { StatusStateMachine } from "../core/domain/StatusStateMachine.js";
@@ -66,13 +67,11 @@ export class GameStateManager {
     );
   }
   public calculateBoardLayout(canvasWidth: number, canvasHeight: number): void {
-    const boardWidth = this.config.BOARD_COLS * this.config.CELL_SIZE;
-    const boardHeight = this.config.BOARD_ROWS * this.config.CELL_SIZE;
-
-    this.gameState.cellWidth = this.config.CELL_SIZE;
-    this.gameState.cellHeight = this.config.CELL_SIZE;
-    this.gameState.boardOffsetX = (canvasWidth - boardWidth) / 2;
-    this.gameState.boardOffsetY = (canvasHeight - boardHeight) / 2;
+    const layout = computeBoardLayout(this.config as any, canvasWidth, canvasHeight);
+    this.gameState.cellWidth = layout.cellWidth;
+    this.gameState.cellHeight = layout.cellHeight;
+    this.gameState.boardOffsetX = layout.boardOffsetX;
+    this.gameState.boardOffsetY = layout.boardOffsetY;
   }
 
   public selectUnit(row: number, col: number): boolean {
