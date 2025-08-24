@@ -10,9 +10,16 @@ export type MapModuleOptions = {
   gridSize?: number; // default 20
   paddingRatio?: number; // default 0.1 of min(canvas)
   initialState?: MapSnapshot;
+  loader?: import("./MapLoader").IMapLoader;
+  pathFinder?: import("./PathFinder").IPathFinder;
+  renderer?: import("./MapRenderer").IMapRenderer;
+  collectibleCount?: number; // used by default loader
 };
 
 import { clampDestination, createSnapshot, findHitSquareId } from "./MapLogic.js";
+import { DefaultRandomMapLoader, type IMapLoader } from "./MapLoader.js";
+import { DirectPathFinder, type IPathFinder } from "./PathFinder.js";
+import { DefaultCanvasRenderer, type IMapRenderer } from "./MapRenderer.js";
 
 export class MapModule {
   private canvas: HTMLCanvasElement;
@@ -22,6 +29,12 @@ export class MapModule {
 
   private gridSize: number;
   private paddingRatio: number;
+
+  // Strategy-like dependencies
+  private loader: IMapLoader;
+  private pathFinder: IPathFinder;
+  private renderer: IMapRenderer;
+  private collectibleCount: number | undefined;
 
   private offsetX = 0;
   private offsetY = 0;
@@ -42,6 +55,7 @@ export class MapModule {
   private isMoving = false;
   private moveSpeedPxPerSec = 300; // movement speed
   private lastTime: number | null = null;
+  private currentPath: { row: number; col: number }[] = [];
 
   // Squares (collectibles)
   private squares: MapSquare[] = [];
@@ -63,6 +77,12 @@ export class MapModule {
 
     this.gridSize = opts.gridSize ?? 20;
     this.paddingRatio = opts.paddingRatio ?? 0.1;
+
+    // Strategies with defaults
+    this.loader = opts.loader ?? new DefaultRandomMapLoader();
+    this.pathFinder = opts.pathFinder ?? new DirectPathFinder();
+    this.renderer = opts.renderer ?? new DefaultCanvasRenderer();
+    this.collectibleCount = opts.collectibleCount;
 
     // Initialize from snapshot or defer square creation until start()
     if (opts.initialState) {
@@ -119,8 +139,23 @@ export class MapModule {
 
     // Lazily initialize squares once per MapModule lifetime
     if (!this.squaresInitialized) {
-      this.squares = this.generateInitialSquares(2);
-      this.squaresInitialized = true;
+      const loaded = this.loader.load({
+        gridSize: this.gridSize,
+        playerRow: this.playerRow,
+        playerCol: this.playerCol,
+        count: this.collectibleCount,
+      });
+      const result = (loaded as any).squares ? (loaded as any) : (loaded as Promise<any>);
+      if (result instanceof Promise) {
+        // If async loader is used, we initialize after it resolves
+        result.then((r) => {
+          this.squares = r.squares.map((s: MapSquare) => ({ ...s }));
+          this.squaresInitialized = true;
+        });
+      } else {
+        this.squares = (result as { squares: MapSquare[] }).squares.map((s) => ({ ...s }));
+        this.squaresInitialized = true;
+      }
     }
 
     window.addEventListener("resize", this.handleResize);
@@ -186,25 +221,26 @@ export class MapModule {
     // Update movement
     if (dt > 0) this.updateMovement(dt);
 
-    // Clear
-    this.ctx.fillStyle = "#fafafa";
-    this.ctx.fillRect(0, 0, this.canvas.width, this.canvas.height);
-
-    // Draw
-    this.drawGrid();
-    this.drawCoordinates();
-    this.drawSquares();
-    this.drawPlayer();
-
-    // Footer hint
-    this.ctx.fillStyle = "#555";
-    this.ctx.font = "16px Arial";
-    this.ctx.textAlign = "center";
-    this.ctx.fillText(
-      "Click triangle to select, then click a cell to move. Press R to return to menu.",
-      this.canvas.width / 2,
-      this.offsetY + this.cellSize * this.gridSize + 30,
-    );
+    // Delegate all drawing to renderer
+    this.renderer.draw({
+      ctx: this.ctx,
+      canvas: this.canvas,
+      gridSize: this.gridSize,
+      cellSize: this.cellSize,
+      offsetX: this.offsetX,
+      offsetY: this.offsetY,
+      player: {
+        row: this.playerRow,
+        col: this.playerCol,
+        x: this.playerX,
+        y: this.playerY,
+        selected: this.playerSelected,
+        targetX: this.targetX,
+        targetY: this.targetY,
+        isMoving: this.isMoving,
+      },
+      squares: this.squares,
+    });
 
     this.rafId = requestAnimationFrame(this.loop);
   };
@@ -377,12 +413,22 @@ export class MapModule {
   }
 
   private setDestination(row: number, col: number): void {
-    this.targetRow = row;
-    this.targetCol = col;
-    const t = this.cellCenter(row, col);
-    this.targetX = t.x;
-    this.targetY = t.y;
-    this.isMoving = true;
+    // Compute path using strategy (default: direct)
+    this.currentPath = this.pathFinder.computePath({
+      start: { row: this.playerRow, col: this.playerCol },
+      dest: { row, col },
+      gridSize: this.gridSize,
+    });
+    // Set first waypoint as target
+    const next = this.currentPath.shift();
+    if (next) {
+      this.targetRow = next.row;
+      this.targetCol = next.col;
+      const t = this.cellCenter(next.row, next.col);
+      this.targetX = t.x;
+      this.targetY = t.y;
+      this.isMoving = true;
+    }
   }
 
   private updateMovement(dt: number): void {
@@ -395,13 +441,27 @@ export class MapModule {
     const step = this.moveSpeedPxPerSec * dt;
 
     if (dist <= step || dist === 0) {
-      // Snap to target
+      // Snap to current waypoint target
       this.playerX = this.targetX;
       this.playerY = this.targetY;
       this.playerRow = this.targetRow ?? this.playerRow;
       this.playerCol = this.targetCol ?? this.playerCol;
+
+      // If path has remaining waypoints, continue to next waypoint
+      const next = this.currentPath.shift();
+      if (next) {
+        this.targetRow = next.row;
+        this.targetCol = next.col;
+        const t = this.cellCenter(next.row, next.col);
+        this.targetX = t.x;
+        this.targetY = t.y;
+        this.isMoving = true;
+        return;
+      }
+
+      // Path finished
       this.isMoving = false;
-      // Check square collision upon arrival
+      // Check square collision upon final arrival
       const hitId = findHitSquareId(this.squares, this.playerRow, this.playerCol);
       if (hitId && this.onSquareReached) {
         // Emit with current snapshot (via helper to ensure deep copy semantics)
