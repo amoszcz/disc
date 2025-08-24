@@ -2,7 +2,10 @@
 import CONFIG from "./config/GameConfig.js";
 import { MapModule, type MapSnapshot } from "./map/MapModule.js";
 import { BattleModuleFactory } from "./battle/BattleModuleFactory.js";
-import { createRandomBattle, logBattleSetup } from "./utils/BattleSetupUtils.js";
+import {
+  createRandomBattle,
+  logBattleSetup,
+} from "./utils/BattleSetupUtils.js";
 
 window.addEventListener("load", () => {
   let game: Game | null = null; // used for menu or battle sessions
@@ -12,9 +15,7 @@ window.addEventListener("load", () => {
   const startMenu = () => {
     // Initialize Game independently in MENU state
     game = new Game(CONFIG, "game");
-    game
-      .init()
-      .catch((e) => console.error("Failed to init Game:", e));
+    game.init().catch((e) => console.error("Failed to init Game:", e));
 
     // Listen to start via app event bus (decoupled from window)
     import("./utils/EventBus.js").then(({ appEventBus }) => {
@@ -30,12 +31,15 @@ window.addEventListener("load", () => {
   };
 
   const startMap = () => {
-    map = new MapModule("game", { gridSize: 20, initialState: mapSnapshot ?? undefined });
+    map = new MapModule("game", {
+      gridSize: 20,
+      initialState: mapSnapshot ?? undefined,
+    });
     map.onExit = () => {
       // Return to menu when user presses R
       if (map) {
-        // update snapshot before leaving
-        mapSnapshot = map.getSnapshot();
+        // clear snapshot before leaving
+        mapSnapshot = null;
         map.stop();
         map = null;
       }
