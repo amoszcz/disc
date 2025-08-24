@@ -5,7 +5,7 @@ import { BattleModuleFactory } from "./battle/BattleModuleFactory.js";
 import {
   createRandomBattle,
   logBattleSetup,
-} from "./utils/BattleSetupUtils.js";
+} from "./battle/BattleSetupUtils.js";
 
 window.addEventListener("load", () => {
   let game: Game | null = null; // used for menu or battle sessions

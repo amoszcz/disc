@@ -5,9 +5,9 @@
   BattleUnit,
   BattleEvent,
   BattleState,
-} from "../types/BattleTypes.js";
+} from "../battle/BattleTypes.js";
 import type { GameConfig, Unit } from "../types/GameTypes.js";
-import { UnitFactory } from "../utils/UnitFactory.js";
+import { UnitFactory } from "../battle/UnitFactory.js";
 import type { IGame } from "../types/Ports.js";
 import { appEventBus } from "../utils/EventBus.js";
 

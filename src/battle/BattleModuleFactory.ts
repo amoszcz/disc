@@ -1,4 +1,4 @@
-﻿import type { BattleModule, BattleSetup } from "../types/BattleTypes.js";
+﻿import type { BattleModule, BattleSetup } from "../battle/BattleTypes.js";
 import type { GameConfig } from "../types/GameTypes.js";
 import { BattleManager } from "./BattleManager.js";
 import type { IGame } from "../types/Ports.js";

@@ -1,7 +1,7 @@
 ﻿import { describe, it, expect, beforeEach, afterEach } from 'vitest';
-import { UnitFactory } from '../UnitFactory.js';
+import { UnitFactory } from '../../battle/UnitFactory.js';
 import type { UnitConfig } from '../../types/UnitConfig.js';
-import type { BattleUnit } from '../../types/BattleTypes.js';
+import type { BattleUnit } from '../../battle/BattleTypes.js';
 
 const mockConfig: UnitConfig = {
   unitTypeId: 'archer',
